@@ -1,0 +1,21 @@
+name: cron-secret-test
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  test-secret:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm secret is set
+        env:
+          TOKEN: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "Secret is NOT set!"
+            exit 1
+          else
+            echo "Secret is set."
+          fi
