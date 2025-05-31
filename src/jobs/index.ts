@@ -3,9 +3,8 @@ import { pruneOldStories }   from "./pruneOldStories";
 import { addBotComments }    from "./addBotComments";
 
 export async function runCronPipeline() {
-  const results = {
-    ...await refreshTopStories()
-  };
-
-  return results;  // helpful for debugging or JSON response
+  await refreshTopStories();
+  await addBotComments();
+  await pruneOldStories();
+  return {"success": true};  // helpful for debugging or JSON response
 }

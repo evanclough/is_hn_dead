@@ -1,72 +1,71 @@
+// src/app/api/story/[id]/route.ts
+import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/db/client";
-import type { StoryRecord, CommentRecord, StoryWithComments, NestedComment } from "@/types";
+import type {
+  StoryRecord,
+  CommentRecord,
+  NestedComment,
+  StoryWithComments,
+} from "@/types";
 
 export const config = { runtime: "edge" };
 
-async function getCommentWithReplies(id: number): Promise<NestedComment | null> {
-    const rows = await sql`
-        SELECT id, by, kids, parent, text, time, active, is_bot
-        FROM comments
-        WHERE id = ${id}
-        LIMIT 1
-    `;
-    if (!rows.length) return null;
-    if (rows[0].active === false) return null;
+/* ─────────── comment recursion ─────────── */
+async function getCommentWithReplies(
+  id: number,
+): Promise<NestedComment | null> {
+  const rows = await sql<CommentRecord[]>`
+    SELECT * FROM comments WHERE id = ${id} AND active = true LIMIT 1
+  `;
+  if (rows.length === 0) return null;
 
+  const comment = rows[0];
+  const children: NestedComment[] = [];
 
-    const comment: CommentRecord = {
-        ...rows[0],
-        kids: Array.isArray(rows[0].kids) ? rows[0].kids : JSON.parse(rows[0].kids),
-    };
+  for (const kidId of (comment.kids ?? []) as number[]) {
+    const child = await getCommentWithReplies(kidId);
+    if (child) children.push(child);
+  }
 
-    // Recursively fetch children
-    const childComments: NestedComment[] = [];
-    for (const childId of comment.kids) {
-        const childComment = await getCommentWithReplies(childId);
-        if (childComment) childComments.push(childComment);
-    }
-
-    return { ...comment, comments: childComments };
+  return { ...comment, comments: children };
 }
 
+/* ─────────── route handler ─────────── */
 export async function GET(
-    req: Request,
-    { params }: { params: { id: string } }
+  _req: NextRequest,
+  { params }: { params: { id: string } },
 ) {
-    const id = Number(params.id);
+  const storyId = Number(params.id);
 
-    if (isNaN(id)) {
-        return Response.json({ error: "Invalid story id" }, { status: 400 });
-    }
+  /* 1️⃣  Fetch story */
+  const rows = await sql<StoryRecord[]>`
+    SELECT * FROM stories WHERE id = ${storyId} LIMIT 1
+  `;
+  if (rows.length === 0) {
+    return NextResponse.json({ error: "Story not found" }, { status: 404 });
+  }
+  const story = rows[0];
 
-    const rows = await sql`
-        SELECT id, by, kids, descendants, score, time, title, url, text, summary, active, last_activated
-        FROM stories
-        WHERE id = ${id}
-        LIMIT 1
-    `;
+  /* 2️⃣  Pull nested comments */
+  const nestedComments: NestedComment[] = [];
+  for (const kidId of (story.kids ?? []) as number[]) {
+    const nc = await getCommentWithReplies(kidId);
+    if (nc) nestedComments.push(nc);
+  }
 
-    if (!rows.length) {
-        return Response.json({ error: "Story not found" }, { status: 404 });
-    }
+  /* 3️⃣  Count descendants on-the-fly */
+  const [{ count }] = await sql<{ count: number }[]>`
+    SELECT COUNT(*)::int AS count
+    FROM comments
+    WHERE story_id = ${storyId}
+  `;
 
-    const story: StoryRecord = {
-        ...rows[0],
-        kids: Array.isArray(rows[0].kids) ? rows[0].kids : JSON.parse(rows[0].kids),
-    };
+  /* 4️⃣  Build response */
+  const payload: StoryWithComments & { descendants: number } = {
+    ...story,
+    comments: nestedComments,
+    descendants: count,
+  };
 
-    // Recursively fetch all comments for the story
-    const topLevelComments: NestedComment[] = [];
-    for (const kidId of story.kids) {
-        const comment = await getCommentWithReplies(kidId);
-        if (comment) topLevelComments.push(comment);
-    }
-
-    // Add `comments` field to the story object
-    const storyWithComments: StoryWithComments = {
-        ...story,
-        comments: topLevelComments,
-    };
-
-    return Response.json(storyWithComments);
+  return NextResponse.json(payload);
 }

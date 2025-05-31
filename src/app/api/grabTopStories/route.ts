@@ -1,32 +1,36 @@
+// src/app/api/grabTopStories/route.ts
 import { sql } from "@/db/client";
-import type { StoryRecord } from "@/types";
+import type { FinishedStoryRecord } from "@/types";
 
 export const config = { runtime: "edge" };
 
+
 export async function GET() {
-    // Get all stories on the front page, sorted by rank
-    const rows = await sql`
-        SELECT id, by, kids, descendants, score, time, title, url, text, summary, active, last_activated
-        FROM stories
-        WHERE active >= 1
-        ORDER BY active ASC
-    `;
+  // Fetch active stories (active > 0) plus comment count
+  const rows = await sql<FinishedStoryRecord[]>`
+    SELECT
+      s.id,
+      s.by,
+      s.kids,
+      s.score,
+      s.time,
+      s.title,
+      s.url,
+      s.text,
+      s.summary,
+      s.active,
+      s.last_activated,
+      COUNT(c.id)::int AS descendants         -- comment total
+    FROM stories      AS s
+    LEFT JOIN comments AS c
+           ON c.story_id = s.id
+    WHERE s.active > 0
+    GROUP BY
+      s.id, s.by, s.kids, s.score, s.time,
+      s.title, s.url, s.text, s.summary,
+      s.active, s.last_activated
+    ORDER BY s.active ASC                     -- rank 1,2,3…
+  `;
 
-    // Cast/convert to StoryRecord[]
-    const stories: StoryRecord[] = rows.map((row: any) => ({
-        id: row.id,
-        by: row.by,
-        kids: Array.isArray(row.kids) ? row.kids : JSON.parse(row.kids),
-        descendants: row.descendants,
-        score: row.score,
-        time: row.time,
-        title: row.title,
-        url: row.url,
-        text: row.text,
-        summary: row.summary,
-        active: row.active,
-        last_activated: row.last_activated,
-    }));
-
-    return Response.json(stories);
+  return Response.json(rows as FinishedStoryRecord[]);
 }

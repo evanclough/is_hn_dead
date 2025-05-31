@@ -1,0 +1,47 @@
+.container {
+  display: flex;
+  flex-direction: column;   /* stack table then comment list */
+  align-items: flex-start;  /* ⬅️ left-align, no centering */
+  margin: 20px 0 0 0;       /* top space only */
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 10pt;
+  color: #828282;
+  padding: 0rem 1rem;
+}
+.mainTable {
+  background: #f6f6ef;
+  border-collapse: collapse;
+  width: auto;             /* ⬅️  shrink to fit content */
+  max-width: 400px;        /* ⬅️  optional hard cap */
+}
+
+.profileTable td {
+  padding: 2px 10px 2px 10px;
+  font-size: 13pt;
+}
+
+.commentsHeader {
+  margin-top: 16px;
+  font-weight: bold;
+  color: black;
+}
+
+.commentList {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 8px;
+  color: black;
+}
+
+.commentItem {
+  margin-bottom: 12px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 8px;
+  font-size: 11pt;
+}
+
+.commentMeta {
+  font-size: 9pt;
+  color: #828282;
+  margin-bottom: 4px;
+}

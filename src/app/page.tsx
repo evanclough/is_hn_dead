@@ -1,6 +1,6 @@
 // app/page.tsx
 import React from "react";  
-import type { StoryRecord } from "@/types";
+import type { FinishedStoryRecordStoryRecord } from "@/types";
 import styles from "./StoryTable.module.css";
 import { getTimeString } from "@/lib/utils";
 
@@ -26,7 +26,7 @@ export default async function HomePage() {
   const res = await fetch(`${base}/api/grabTopStories`, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to load top stories");
 
-  const stories: StoryRecord[] = await res.json();
+  const stories: FinishedStoryRecord[] = await res.json();
 
   return (
     <table className={styles.table}>
@@ -41,7 +41,7 @@ export default async function HomePage() {
               <tr>
                 <td className={styles.rank}>{idx + 1}.</td>
                 <td className={styles.titleLine}>
-                  <a href={`/story/${story.id}`} className={styles.titleLink}>
+                  <a href={story.url ?? `/story/${story.id}`} className={styles.titleLink}>
                     {story.title}
                   </a>
                   {host && (
@@ -54,7 +54,7 @@ export default async function HomePage() {
               <tr>
                 <td /> {/* empty cell under rank */}
                   <td className={styles.subtext}>
-                    {story.score} points by {story.by} {getTimeString(story.time)}  | <a className={styles.subtextLink} href={`/story/${story.id}`}>{story.descendants} comments </a>
+                    {story.score} points by {story.by} {getTimeString(story.time)}  | <a className={styles.subtextLink} href={`/story/${story.id}`}>{story.descendants} comment{story.descendants > 0 ? "s" : ""} </a>
                   </td>
               </tr>
 

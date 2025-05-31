@@ -25,7 +25,6 @@ export type StoryRecord = {
     id: number;
     by: string;
     kids: number[];
-    descendants: number;
     score: number;
     time: number;
     title: string;
@@ -35,12 +34,15 @@ export type StoryRecord = {
     active: number;
     last_activated: number;
 };
+export type FinishedStoryRecord = StoryRecord & { descendants: number };
+
 
 export type CommentRecord = {
     id: number;
     by: string;
     kids: number[];
     parent: number;
+    story_id: number;
     text: string | null;
     time: number;
     active: boolean;
