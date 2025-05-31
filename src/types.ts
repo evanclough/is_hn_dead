@@ -1,18 +1,68 @@
-export interface Comment {
-  id: number;
-  text: string;
-  isBot: boolean;
-  children: Comment[];
-}
+// types.ts
 
-export interface Bot {
-  username: string;
-  llm: string;            // e.g. "openai-gpt-4o"
-  personality: string;    // short human-readable summary
-  commentsAuthored: number;
-  bio: string;
-}
+export type AlgoliaItem = {
+    author: string;
+    children: AlgoliaItem[];
+    created_at: string;
+    created_at_i: number; // unix timestamp
+    id: number;
+    options: any[];
+    parent_id: number | null;
+    points: number | null;
+    story_id: number;
+    text: string | null;
+    title: string | null;
+    type: string;
+    url: string | null;
+};
 
-export interface ResultsSummary {
-  botIds: string[];   // usernames of all bots in order you’ll rank later
-}
+export type AlgoliaError = {
+    error: string;
+    status: number;
+};
+
+export type StoryRecord = {
+    id: number;
+    by: string;
+    kids: number[];
+    descendants: number;
+    score: number;
+    time: number;
+    title: string;
+    url: string | null;
+    text: string | null;
+    summary: string;
+    active: number;
+    last_activated: number;
+};
+
+export type CommentRecord = {
+    id: number;
+    by: string;
+    kids: number[];
+    parent: number;
+    text: string | null;
+    time: number;
+    active: boolean;
+    is_bot: boolean;
+};
+
+export type NestedComment = CommentRecord & { comments: NestedComment[] };
+export type StoryWithComments = StoryRecord & { comments: NestedComment[] };
+
+
+export type GuessRecord = {
+    id: number;
+    comment_id: number | null; // nullable because of ON DELETE SET NULL
+    is_real: boolean;
+    timestamp: number;
+};
+
+export type BotRecord = {
+    username: string;
+    llm: string;
+    method: string;
+    personality: any; // JSON object, you can type this further if you want
+    created: number;
+    active: boolean;
+};

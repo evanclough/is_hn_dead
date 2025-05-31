@@ -1,12 +1,14 @@
-import type { ResultsSummary } from "@/types";
+import { sql } from "@/db/client";
 
-export const config = { runtime: "edge" };   // optional Edge Function
+export const config = { runtime: "edge" };
 
 export async function GET() {
-  // Hard-coded list you’ll replace with a DB query later
-  const payload: ResultsSummary = {
-    botIds: ["stub_bot", "chatty_bot", "optimist_bot"],
-  };
+    const rows = await sql`
+        SELECT username FROM bots
+        ORDER BY username ASC
+        LIMIT 5
+    `;
+    const usernames = rows.map((row: { username: string }) => row.username);
 
-  return Response.json(payload);
+    return Response.json(usernames);
 }

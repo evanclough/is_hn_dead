@@ -1,0 +1,59 @@
+/* app/StoryTable.module.css */
+
+.table td {
+  padding: 0;            /* wipe out the browser’s default cell padding */
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* ───────── first row (rank + title line) ───────── */
+.rank {
+  color: #828282;
+  padding-left: 0.5rem;
+  padding-right: 0.2rem;
+}
+
+.titleLine {
+  font-size: 13pt;
+  line-height: 1.3;
+}
+
+.titleLink {
+  color: #000000;
+  text-decoration: none;
+  word-break: break-word;
+}
+.titleLink:hover {
+  text-decoration: none;
+}
+
+.subtextLink {
+  color: #828282;
+  text-decoration: none;
+  word-break: break-word;
+}
+.subtextLink:hover {
+  text-decoration: underline;
+}
+
+.domain {
+  font-size: 11pt;
+  color: #828282;
+  margin-left: 4px;
+  user-select: none;
+}
+
+/* ───────── second row (points / subtext) ───────── */
+.subtext {
+  font-size: 10pt;
+  color: #828282;
+  padding-left: 2.6rem;
+}
+
+/* ───────── spacer between stories ───────── */
+.spacer {
+  height: 5px;
+}

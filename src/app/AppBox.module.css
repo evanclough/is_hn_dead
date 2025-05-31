@@ -1,0 +1,17 @@
+/* app/AppBox.module.css */
+
+.container {
+  background-color: #f6f6ef; /* HN pale yellow */
+  width: 85%;
+  margin: 0.5rem auto 0;    /* ⬅︎ 0.5 rem space above the box */
+  min-height: calc(100vh - 0.5rem); /* keep full-height feel */
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+
+/* ↓ updated */
+.main {
+  padding: 1rem 0rem;   /* 1 rem top/bottom, 0.5 rem left/right */
+}

@@ -1,9 +1,12 @@
-// Minimal root layout – nothing but the required HTML/BODY wrapper.
-// Keep the import if you generated Tailwind via `create-next-app --tailwind`.
-import "./globals.css";
+// app/layout.tsx
+import "@/app/globals.css";
+import Header from "@/components/Header";
+import styles from "./AppBox.module.css";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "HN-Clone",
+export const metadata: Metadata = {
+  title: "HN Clone",
+  description: "A Hacker-News-style site with AI bots",
 };
 
 export default function RootLayout({
@@ -13,7 +16,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      {/* Reset default margins globally in CSS; no Tailwind needed */}
+      <body>
+        <div className={styles.container}>
+          <Header />
+
+          <main className={styles.main}>{children}</main>
+        </div>
+      </body>
     </html>
   );
 }

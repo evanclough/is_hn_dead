@@ -1,0 +1,104 @@
+/* app/story/[id]/Story.module.css */
+
+.container {
+  /* slimmer top padding, same left/right/bottom */
+  padding: 0.5rem 1rem 1rem;
+}
+
+/* ─── Title line ─── */
+.titleLine {
+  font-size: 13pt;
+  line-height: 1.3;
+}
+
+.titleLink {
+  color: #000000;
+  text-decoration: none;
+  word-break: break-word;
+}
+.titleLink:hover {
+  text-decoration: underline;
+}
+
+.domain {
+  font-size: 11pt;
+  color: #828282;
+  margin-left: 4px;
+  user-select: none;
+}
+
+/* ─── points / author line ─── */
+.subtext {
+  font-size: 12pt;        /* a bit larger */
+  color: #828282;
+  line-height: 1.3;
+  padding: 2px 0;         /* ↑ extra top / bottom space */
+}
+
+.subtextLink {
+  color: #828282;
+  text-decoration: none;
+  word-break: break-word;
+}
+.subtextLink:hover {
+  text-decoration: underline;
+}
+
+.commentSubtext {
+  font-size: 10pt;        /* a bit larger */
+  color: #828282;
+  padding: 5px 0;         /* ↑ extra top / bottom space */
+}
+
+.commentBody {
+  font-size: 12.5pt;         /* ↑ a bit larger */
+  white-space: pre-line;   /* keep linebreaks */
+}
+
+.commentBlock {
+  margin-top: 10px;        /* more vertical spacing */
+}
+
+
+.guessLink {
+  cursor: pointer;
+  text-decoration: underline;
+  color: #000000;
+}
+
+.guessLink:hover {
+  text-decoration: none;      /* subtle hover */
+}
+
+.resultCorrect {
+  color: green;
+}
+
+.resultWrong {
+  color: #a30000;             /* red-ish like HN’s .ca2 */
+}
+
+.hiddenUser {
+  color: #f6f6ef;        /* same as page background → invisible */
+}
+
+
+.commentLink {
+  color: #828282;          /* same gray as meta line */
+  text-decoration: none;   /* no underline by default */
+}
+
+.commentLink:hover {
+  text-decoration: underline;
+}
+
+.collapseBtn {
+  cursor: pointer;
+  color: #828282;
+  user-select: none;
+  text-decoration: none;
+}
+
+.collapseBtn:hover {
+  text-decoration: underline;
+}

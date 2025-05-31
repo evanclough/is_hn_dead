@@ -11,11 +11,10 @@ CREATE TABLE IF NOT EXISTS stories (
     url            TEXT,
     text           TEXT,
     summary        TEXT,
-    active         BOOLEAN      DEFAULT FALSE,
+    active         INTEGER      DEFAULT -1,  -- -1 = inactive, 1..n = front-page rank
     last_activated BIGINT
 );
 
--- keep this one
 CREATE INDEX IF NOT EXISTS idx_stories_active
     ON stories(active);
 
@@ -29,7 +28,6 @@ CREATE TABLE IF NOT EXISTS comments (
     parent   BIGINT,
     text     TEXT,
     time     BIGINT,
-    deleted  BOOLEAN DEFAULT FALSE,
     active   BOOLEAN DEFAULT FALSE,
     is_bot   BOOLEAN DEFAULT FALSE
 );
@@ -44,7 +42,8 @@ CREATE TABLE IF NOT EXISTS bots (
     llm         TEXT,
     method      TEXT,
     personality JSONB,
-    created     BIGINT
+    created     BIGINT,
+    active      BOOLEAN DEFAULT FALSE
 );
 
 
@@ -54,10 +53,9 @@ CREATE TABLE IF NOT EXISTS guesses (
     id          BIGSERIAL PRIMARY KEY,
     comment_id  BIGINT
         REFERENCES comments(id) ON DELETE SET NULL,
-    is_real     BOOLEAN,
+    is_fake     BOOLEAN,
     timestamp   BIGINT
 );
 
--- keep this one
 CREATE INDEX IF NOT EXISTS idx_guesses_comment
     ON guesses(comment_id);

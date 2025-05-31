@@ -1,0 +1,58 @@
+/* components/Header.module.css */
+
+.header {
+  background-color: #ff6600;
+  padding: 0.15rem;          /* slimmer top/bottom */
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Robot badge */
+.robotBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 1px solid #ffffff;
+  border-radius: 0;
+  font-size: 1.1rem;              /* the emoji itself */
+  line-height: 1;
+  user-select: none;
+}
+
+/* Title: “Hacker News?” */
+.title,
+.title:hover,
+.title:focus,
+.title:active,
+.title:visited {
+  margin: 0;
+  font-size: 13pt;                /* HN uses 10 pt in the header */
+  font-weight: 700;
+  color: #000000;
+  text-decoration:none
+}
+
+/* Horizontal link group: results | writeup | source */
+.links {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 13pt;                /* same 10 pt as HN nav links */
+}
+
+.link,
+.link:hover,
+.link:focus,
+.link:active,
+.link:visited {
+  color: #000000;
+  text-decoration: none;
+}
+
+.pipe {
+  user-select: none;
+  pointer-events: none;
+}

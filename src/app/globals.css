@@ -1,0 +1,10 @@
+/* app/globals.css */
+html,
+body {
+  margin: 0;                                     /* reset */
+  font-family: Verdana, Geneva, sans-serif;      /* your chosen font */
+}
+
+html {
+  scroll-behavior: smooth;   /* native smooth anchor scrolling */
+}
