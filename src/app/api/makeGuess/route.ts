@@ -1,5 +1,21 @@
+/*
+
+    ENDPOINT: makeGuess
+
+    Takes in a JSON containing a comment ID as a string, and a guess as a boolean,
+    and inserts into database.
+
+    Code is odd because of security concern of converting the string comment ID to a number. 
+
+    TODO: fix that
+
+*/
+
+
+import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/db/client";
 import type { GuessRecord } from "@/types";
+
 
 export const config = { runtime: "edge" };
 
@@ -20,13 +36,14 @@ function toSafeInt(value: unknown): number {
   }
   return n;
 }
-export async function POST(req: Request) {
+
+
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-
-    const commentId = toSafeInt(body.comment_id);   // ← use the helper
+    const commentId = toSafeInt(body.comment_id);
     if (typeof body.is_fake !== "boolean") {
-      return Response.json({ error: "Invalid input" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
     }
 
     const now = Math.floor(Date.now() / 1000);
@@ -37,10 +54,9 @@ export async function POST(req: Request) {
       RETURNING id, comment_id, is_fake, timestamp
     `;
 
-    return Response.json(guess as GuessRecord, { status: 201 });
+    return NextResponse.json(guess as GuessRecord, { status: 201 });
   } catch (err) {
-    /* helper or db failure ends up here */
-    return Response.json(
+    return NextResponse.json(
       { error: "Invalid input", details: (err as Error).message },
       { status: 400 }
     );

@@ -1,4 +1,20 @@
-// src/app/results/page.tsx
+/*
+
+  FRONTEND PAGE: /results
+
+  Displays the results of the experiment.
+
+  For now, shows the total number of correct and incorrect guesses,
+  and the top 5 bots, ranked by deception score. 
+
+  TODO:
+  should eventually show average deception score among bots as well,
+  lot more stuff to potentially be put in here.
+
+*/
+
+
+import { grabTopBots } from "@/db/client";
 
 type ResultsPayload = {
   totalCorrect: number;
@@ -17,15 +33,12 @@ export default async function ResultsPage() {
 
   const data: ResultsPayload = await res.json();
 
+  const topBots = await grabTopBots();
+  console.log(topBots)
+
   return (
     <main>
       <h1>Results</h1>
-
-      <p>
-        Total correct guesses: {data.totalCorrect}
-        <br />
-        Total incorrect guesses: {data.totalIncorrect}
-      </p>
 
       <h2>Top 5 Bots by Incorrect Ratio</h2>
       {data.topBots.length === 0 ? (

@@ -1,8 +1,18 @@
-// app/page.tsx
+/*
+
+  FRONTEND PAGE: /
+
+  Displays what should be an almost exact clone of the hacker news front page,
+  without the upvote button.
+
+  State should just be the list of story records, along with their descendant counts.
+
+*/
 import React from "react";  
-import type { FinishedStoryRecordStoryRecord } from "@/types";
+import type { FrontPage } from "@/types";
 import styles from "./StoryTable.module.css";
 import { getTimeString } from "@/lib/utils";
+import {grabTopStories} from "@/db/client";
 
 /** Formats domain: (github.com/user) special-cased, others host only */
 function displayHost(urlStr: string | null) {
@@ -22,16 +32,17 @@ function displayHost(urlStr: string | null) {
 }
 
 export default async function HomePage() {
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const res = await fetch(`${base}/api/grabTopStories`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to load top stories");
 
-  const stories: FinishedStoryRecord[] = await res.json();
+  const stories: FrontPage | null = await grabTopStories();
 
   return (
     <table className={styles.table}>
       <tbody>
-        {stories.map((story, idx) => {
+        
+        {stories === null ? 
+          <p>error retrieving top stories</p>
+          : 
+        stories.map((story, idx) => {
           const host = displayHost(story.url);
 
           return (

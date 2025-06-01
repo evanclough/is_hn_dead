@@ -1,29 +1,25 @@
-// src/app/api/grabResults/route.ts
+/*
+
+ENDPOINT: grabResults
+
+Returns both the total number of correct and incorrect guesses,
+and the top 5 bot usernames, ranked by deception score.
+
+TODO: split into two endpoints.
+
+*/
+import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/db/client";
+import type { BotPerformance } from "@/types";
 
 export const config = { runtime: "edge" };
 
-type TotalsRow = { correct: number; incorrect: number };
 
-type BotRow = {
-  username: string;
-  humanGuesses: number;
-  totalGuesses: number;
-  incorrectRatio: number;
-};
 
-export async function GET() {
-  /* ───────── 1. overall correct / incorrect ───────── */
-  const [{ correct, incorrect }] = await sql<TotalsRow[]>`
-    SELECT
-      SUM(CASE WHEN c.is_bot = g.is_fake THEN 1 ELSE 0 END)::int   AS correct,
-      SUM(CASE WHEN c.is_bot <> g.is_fake THEN 1 ELSE 0 END)::int AS incorrect
-    FROM guesses  AS g
-    JOIN comments AS c ON c.id = g.comment_id
-  `;
+export async function GET(_req: NextRequest) {
 
   /* ───────── 2. per-bot incorrectRatio = human / total ───────── */
-  const topBots = await sql<BotRow[]>`
+  const topBots = await sql<BotPerformance[]>`
     SELECT
       c.by AS username,
 
@@ -53,9 +49,7 @@ export async function GET() {
   }));
 
   /* ───────── response ───────── */
-  return Response.json({
-    totalCorrect: correct,
-    totalIncorrect: incorrect,
+  return NextResponse.json({
     topBots: worstBots,
   });
 }

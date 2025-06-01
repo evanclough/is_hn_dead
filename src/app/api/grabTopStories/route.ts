@@ -1,11 +1,17 @@
-// src/app/api/grabTopStories/route.ts
+/*
+
+ENDPOINT: grabTopStories
+
+returns the currently active stories, and also counts their descendants.
+
+*/
+import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/db/client";
 import type { FinishedStoryRecord } from "@/types";
 
 export const config = { runtime: "edge" };
 
-
-export async function GET() {
+export async function GET(_req: NextRequest) {
   // Fetch active stories (active > 0) plus comment count
   const rows = await sql<FinishedStoryRecord[]>`
     SELECT
@@ -32,5 +38,5 @@ export async function GET() {
     ORDER BY s.active ASC                     -- rank 1,2,3…
   `;
 
-  return Response.json(rows as FinishedStoryRecord[]);
+  return NextResponse.json(rows as FinishedStoryRecord[]);
 }

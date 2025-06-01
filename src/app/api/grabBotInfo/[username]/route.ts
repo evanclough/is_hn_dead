@@ -1,26 +1,33 @@
-// src/app/api/bot/[username]/route.ts
+/*
+  ENDPOINT: /api/grabBotInfo/[username]
+
+  Takes in a bot's username, and returns their record in the database,
+  all of their comments, along with the guesses on those comments.
+
+  TODO: split into two separate endpoints to separately grab their personality info,
+  and their comments with the guesses.
+*/
+
+
+import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/db/client";
-import type { BotRecord, CommentRecord } from "@/types";
+import type { BotRecord, CommentRecord, CommentWithGuessCounts } from "@/types";
 
 export const config = { runtime: "edge" };
 
-type CommentWithGuessCounts = CommentRecord & {
-  numberHumanGuesses: number;
-  numberBotGuesses: number;
-};
+
 
 export async function GET(
-  _req: Request,
-  { params }: { params: { username: string } },
+  _req: NextRequest,
+  { params }: { params: Promise<{ username: string }> },
 ) {
-  const username = params.username;
+  // await params before using .username
+  const { username } = await params;
 
-  /* basic validation */
   if (typeof username !== "string" || username.length === 0) {
-    return Response.json({ error: "Invalid username" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid username" }, { status: 400 });
   }
 
-  /* ───── 1. fetch bot record ───── */
   const botRows = await sql<BotRecord[]>`
     SELECT username, llm, method, personality, created, active
     FROM   bots
@@ -28,11 +35,10 @@ export async function GET(
     LIMIT  1
   `;
   if (botRows.length === 0) {
-    return Response.json({ error: "Bot not found" }, { status: 404 });
+    return NextResponse.json({ error: "Bot not found" }, { status: 404 });
   }
   const bot = botRows[0];
 
-  /* ───── 2. fetch bot's comments + guess counts ───── */
   const commentRows = await sql<CommentWithGuessCounts[]>`
     SELECT
       c.id,
@@ -43,15 +49,12 @@ export async function GET(
       c.time,
       c.active,
       c.is_bot,
-      c.story_id,                             -- keep if present
-      /* guess tallies */
-      COALESCE(SUM(CASE WHEN g.is_fake THEN 1 ELSE 0 END), 0)
-        AS "numberBotGuesses",
-      COALESCE(SUM(CASE WHEN g.is_fake IS FALSE THEN 1 ELSE 0 END), 0)
-        AS "numberHumanGuesses"
+      c.story_id,
+      COALESCE(SUM(CASE WHEN g.is_fake THEN 1 ELSE 0 END), 0)       AS "numberBotGuesses",
+      COALESCE(SUM(CASE WHEN g.is_fake IS FALSE THEN 1 ELSE 0 END), 0) AS "numberHumanGuesses"
     FROM comments AS c
     LEFT JOIN guesses AS g
-           ON g.comment_id = c.id
+      ON g.comment_id = c.id
     WHERE c.by = ${username}
     GROUP BY
       c.id, c.by, c.kids, c.parent, c.text,
@@ -59,9 +62,5 @@ export async function GET(
     ORDER BY c.time DESC
   `;
 
-  /* ───── 3. build and send payload ───── */
-  return Response.json({
-    ...bot,
-    comments: commentRows,
-  });
+  return NextResponse.json({ ...bot, comments: commentRows });
 }

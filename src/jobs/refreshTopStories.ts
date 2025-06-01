@@ -16,12 +16,10 @@ function summarize(url: string | null, text: string | null) {
 }
 
 // Main CRON refresh function: updates active stories, sets rank in "active"
-export async function refreshTopStories() {
+export async function refreshTopStories(cronInterval: number) {
     // 1. Set all stories/comments to inactive
-    /*
     await sql`UPDATE stories SET active = -1`;
     await sql`UPDATE comments SET active = FALSE`;
-    */
 
     // 2. Get top stories from HN API
     const topIds: number[] = await fetchJson("https://hacker-news.firebaseio.com/v0/topstories.json");
@@ -55,7 +53,7 @@ export async function refreshTopStories() {
 
         // For each child, call refreshComment
         for (const child of algoliaStory.children) {
-            const isNewlyStored = await refreshComment(child, algoliaStory.id, 0);
+            const isNewlyStored = await refreshComment(child, algoliaStory.id, 0, cronInterval);
             if (isNewlyStored) newKids.push(child.id);
         }
 
@@ -195,7 +193,7 @@ export async function addTopStories() {
 }
 
 // Recursive function as described in your spec
-async function refreshComment(comment: AlgoliaItem, storyId: number, depth: number): Promise<boolean> {
+async function refreshComment(comment: AlgoliaItem, storyId: number, depth: number, cronInterval: number): Promise<boolean> {
     let newKids: number[] = [];
     let totalNewDescendants = 0;
 
@@ -207,7 +205,7 @@ async function refreshComment(comment: AlgoliaItem, storyId: number, depth: numb
     if(result.length === 0){
 
         // if its older than the last refresh, throw it out
-        if (now - comment.created_at_i > 600){
+        if (now - comment.created_at_i > cronInterval){
             return false;
         }
         //otherwise, flip a coin and potentially add it

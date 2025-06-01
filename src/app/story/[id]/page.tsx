@@ -1,11 +1,23 @@
+/*
+
+  FRONTEND PAGE: /story/[id]
+
+  Displays a story page, supposed to look almost exactly like that of HN,
+  without the upvote button / comment submission box,
+  and with the human / bot guesses.
+
+  State should be just the storys record along with all of the comments.
+
+*/
+
+
 import React from "react";
 import { getTimeString } from "@/lib/utils";
-import type { StoryWithComments } from "@/types";
+import type { StoryWithComments, StoryCard, NestedComment } from "@/types";
 import CommentItem from "./CommentItem";
 import styles from "./Story.module.css";
+import {grabStoryCard, grabStoryComments} from "@/db/client";
 
-
-/* Helper to show host or github.com/user */
 function displayHost(urlStr: string | null) {
   try {
     if (!urlStr) return null;
@@ -22,19 +34,41 @@ function displayHost(urlStr: string | null) {
   }
 }
 
-export default async function StoryPage({ params }: { params: { id: string } }) {
+export default async function Story({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  // await the params object before using .id
+  const { id } = await params;
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const res = await fetch(`${base}/api/grabStory/${params.id}`, { cache: "no-store" });
+
+  const res = await fetch(
+    `${base}/api/grabStory/${encodeURIComponent(id)}`,
+    { cache: "no-store" }
+  );
   if (!res.ok) throw new Error("Failed to load story");
 
   const story: StoryWithComments = await res.json();
   const host = displayHost(story.url);
 
+  const storyCard: StoryCard | null = await grabStoryCard(id);
+
+  const comments: NestedComment[] | null = await grabStoryComments(id);
+
+  console.log(storyCard);
+  console.log(comments);
+
   return (
     <main className={styles.container}>
       {/* story header block */}
       <div className={styles.titleLine}>
-        <a href={story.url ?? "#"} target="_blank" rel="noopener noreferrer" className={styles.titleLink}>
+        <a
+          href={story.url ?? "#"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.titleLink}
+        >
           {story.title}
         </a>
         {host && <span className={styles.domain}>({host})</span>}
@@ -56,11 +90,14 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
               rootId={root.id}
               parentId={null}
               prevId={i > 0 ? story.comments[i - 1].id : null}
-              nextId={i < story.comments.length - 1 ? story.comments[i + 1].id : null}
+              nextId={
+                i < story.comments.length - 1
+                  ? story.comments[i + 1].id
+                  : null
+              }
             />
           ))
-        )
-        }
+        )}
       </div>
     </main>
   );

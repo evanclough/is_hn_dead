@@ -1,3 +1,7 @@
+/*
+  Header for everything, mimicking that of HN.
+*/
+
 import Link from "next/link";
 import styles from "./Header.module.css";
 

@@ -36,6 +36,9 @@ export type StoryRecord = {
 };
 export type FinishedStoryRecord = StoryRecord & { descendants: number };
 
+export type StoryCard = StoryRecord & {descendants: number};
+
+export type FrontPage = StoryCard[];
 
 export type CommentRecord = {
     id: number;
@@ -50,6 +53,14 @@ export type CommentRecord = {
 };
 
 export type NestedComment = CommentRecord & { comments: NestedComment[] };
+
+export type Guesses = {
+    human: number;
+    bot: number;
+}
+
+export type CommentWithGuessCounts = CommentRecord & Guesses;
+
 export type StoryWithComments = StoryRecord & { comments: NestedComment[] };
 
 
@@ -68,3 +79,12 @@ export type BotRecord = {
     created: number;
     active: boolean;
 };
+
+export type BotPerformance = {
+  username: string;
+  humanGuesses: number;
+  totalGuesses: number;
+  incorrectRatio: number;
+};
+
+export type DBRes<T> = Promise<T | null>;

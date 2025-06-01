@@ -1,4 +1,8 @@
-// app/layout.tsx
+/*
+
+  Container for the whole frontend, shows the header at the top.
+
+*/
 import "@/app/globals.css";
 import Header from "@/components/Header";
 import styles from "./AppBox.module.css";

@@ -1,3 +1,12 @@
+/*
+  ENDPOINT: /api/cron/run
+
+  Scuffed implementation of cronjob, called periodically by a GitHub action.
+
+  Takes in a secret token, and if valid, runs the cronjob.
+
+*/
+
 import { runCronPipeline } from "@/jobs";
 export const config = { runtime: "edge" };
 
