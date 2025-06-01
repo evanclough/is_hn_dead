@@ -20,7 +20,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      {/* Reset default margins globally in CSS; no Tailwind needed */}
+      <head>
+        <link rel="icon" href="/question_mark.svg" type="image/svg+xml" />
+      </head>
       <body>
         <div className={styles.container}>
           <Header />

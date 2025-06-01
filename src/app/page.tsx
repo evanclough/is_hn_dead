@@ -11,25 +11,8 @@
 import React from "react";  
 import type { FrontPage } from "@/types";
 import styles from "./StoryTable.module.css";
-import { getTimeString } from "@/lib/utils";
+import { getTimeString, displayHost } from "@/lib/utils";
 import {grabTopStories} from "@/db/client";
-
-/** Formats domain: (github.com/user) special-cased, others host only */
-function displayHost(urlStr: string | null) {
-  try {
-    if (!urlStr) return null;
-    const url = new URL(urlStr);
-    const host = url.hostname.replace(/^www\./, "");
-
-    if (host === "github.com") {
-      const user = url.pathname.split("/").filter(Boolean)[0]; // first path segment
-      return user ? `github.com/${user}` : "github.com";
-    }
-    return host;
-  } catch {
-    return null;
-  }
-}
 
 export default async function HomePage() {
 
@@ -43,7 +26,7 @@ export default async function HomePage() {
           <p>error retrieving top stories</p>
           : 
         stories.map((story, idx) => {
-          const host = displayHost(story.url);
+          const host: string | null = displayHost(story.url);
 
           return (
             /* React fragment because each story is three separate <tr>s */

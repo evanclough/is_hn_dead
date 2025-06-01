@@ -23,3 +23,23 @@ export function getTimeString(unixSeconds: number): string {
   const days = Math.floor(hours / 24);
   return `${days} day${days === 1 ? "" : "s"} ago`;
 }
+
+/*
+  over the top o3 written function to display hte little hostnames
+  in the way HN does
+*/
+export function displayHost(urlStr: string | null): string | null {
+  try {
+    if (!urlStr) return null;
+    const url = new URL(urlStr);
+    const host = url.hostname.replace(/^www\./, "");
+
+    if (host === "github.com") {
+      const user = url.pathname.split("/").filter(Boolean)[0];
+      return user ? `github.com/${user}` : "github.com";
+    }
+    return host;
+  } catch {
+    return null;
+  }
+}

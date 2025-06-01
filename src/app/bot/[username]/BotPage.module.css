@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: column;   /* stack table then comment list */
   align-items: flex-start;  /* ⬅️ left-align, no centering */
-  margin: 20px 0 0 0;       /* top space only */
   font-family: Verdana, Geneva, sans-serif;
   font-size: 10pt;
   color: #828282;

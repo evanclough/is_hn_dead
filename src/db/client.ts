@@ -12,9 +12,9 @@ import {
 
 export const sql = neon(process.env.DATABASE_URL!);
 
-function dbFunctionWrapper<T, R>(f: (...args1: T[]) => Promise<R>): ((...args1: T[]) => DBRes<R>) {
+function dbFunctionWrapper<T, R>(f: (...args1: (T[])) => Promise<R>): ((...args1: (T[])) => DBRes<R>) {
     
-    async function wrapped(...args2: T[]): (DBRes<R>){
+    async function wrapped(...args2: (T[])): (DBRes<R>){
         try {
             const result = await f(...args2);
             return result as R;
@@ -108,8 +108,8 @@ async function _grabBotComments(botUsername: string): Promise<CommentWithGuessCo
         c.active,
         c.is_bot,
         c.story_id,
-        COALESCE(SUM(CASE WHEN g.is_fake THEN 1 ELSE 0 END), 0)       AS "numberBotGuesses",
-        COALESCE(SUM(CASE WHEN g.is_fake IS FALSE THEN 1 ELSE 0 END), 0) AS "numberHumanGuesses"
+        COALESCE(SUM(CASE WHEN g.is_fake THEN 1 ELSE 0 END), 0)       AS "bot",
+        COALESCE(SUM(CASE WHEN g.is_fake IS FALSE THEN 1 ELSE 0 END), 0) AS "human"
         FROM comments AS c
         LEFT JOIN guesses AS g
         ON g.comment_id = c.id
@@ -155,3 +155,16 @@ async function _grabTopBots(): Promise<BotPerformance[]> {
 }
 
 export const grabTopBots: () => DBRes<BotPerformance[]> = dbFunctionWrapper(_grabTopBots);
+
+async function _makeGuess(commentId: number, isFake: boolean): Promise<boolean> {
+
+    const now = Math.floor(Date.now() / 1000);
+
+    await sql`
+      INSERT INTO guesses (comment_id, is_fake, timestamp)
+      VALUES (${commentId}, ${isFake}, ${now})
+    `;
+
+    return true;
+}
+export const makeGuess: (commentId: number, isFake: boolean) => DBRes<boolean> = dbFunctionWrapper<any, boolean>(_makeGuess);

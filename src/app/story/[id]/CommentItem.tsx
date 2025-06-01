@@ -15,7 +15,6 @@ type Props = {
   nextId: number | null;
 };
 
-
 function countDesc(c: NestedComment): number {
   return c.comments.reduce((sum, child) => sum + 1 + countDesc(child), 0)
 }

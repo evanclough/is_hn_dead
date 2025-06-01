@@ -15,6 +15,7 @@
 
 
 import { grabTopBots } from "@/db/client";
+import { DBRes, BotPerformance } from "@/types"
 
 type ResultsPayload = {
   totalCorrect: number;
@@ -23,29 +24,19 @@ type ResultsPayload = {
 };
 
 export default async function ResultsPage() {
-  const base =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
-  const res = await fetch(`${base}/api/grabResults`, {
-    cache: "no-store",
-  });
-  if (!res.ok) throw new Error("Failed to load results");
-
-  const data: ResultsPayload = await res.json();
-
-  const topBots = await grabTopBots();
-  console.log(topBots)
+  const topBots: BotPerformance[] | null = await grabTopBots();
 
   return (
     <main>
       <h1>Results</h1>
 
       <h2>Top 5 Bots by Incorrect Ratio</h2>
-      {data.topBots.length === 0 ? (
-        <p>No bot guesses recorded yet.</p>
+      {topBots === null ? (
+        <p>Error fetching results.</p>
       ) : (
         <ul>
-          {data.topBots.map((bot) => (
+          {topBots!.map((bot) => (
             <li key={bot.username}>
               <a href={`/bot/${bot.username}`}>{bot.username}</a> –{" "}
               {(bot.incorrectRatio * 100).toFixed(1)}% human guesses
