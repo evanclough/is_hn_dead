@@ -88,3 +88,5 @@ export type BotPerformance = {
 };
 
 export type DBRes<T> = Promise<T | null>;
+
+export type ParentTable = "stories" | "comments";

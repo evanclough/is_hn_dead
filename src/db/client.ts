@@ -7,8 +7,15 @@ import {
     BotRecord,
     Guesses,
     CommentWithGuessCounts,
-    BotPerformance
+    BotPerformance,
+    StoryRecord,
+    CommentRecord,
+    ParentTable
 } from "@/types";
+
+import {
+    getRandomCommentId
+} from "@/lib/utils"
 
 export const sql = neon(process.env.DATABASE_URL!);
 
@@ -168,3 +175,69 @@ async function _makeGuess(commentId: number, isFake: boolean): Promise<boolean> 
     return true;
 }
 export const makeGuess: (commentId: number, isFake: boolean) => DBRes<boolean> = dbFunctionWrapper<any, boolean>(_makeGuess);
+
+async function _pruneOldStories(numDaysKept: number): Promise<boolean> {
+    const cutoff: number = Math.floor(Date.now() / 1000) - (60 * 60 * 24 * numDaysKept);
+
+    await sql`
+        DELETE FROM comments
+        WHERE is_bot = false
+        AND story_id IN (
+            SELECT id FROM stories
+            WHERE last_activated < ${cutoff}
+        )
+    `;
+
+    await sql`
+        DELETE FROM stories
+        WHERE last_activated < ${cutoff}
+    `;
+
+    return true;
+}
+export const pruneOldStories: (numDaysKept: number) => DBRes<boolean> = dbFunctionWrapper(_pruneOldStories);
+
+async function _getActiveBots(): Promise<BotRecord[]> {
+    const activeBots = await sql `SELECT * FROM bots WHERE active = true`;
+
+    return activeBots as BotRecord[];
+}
+
+export const getActiveBots: () => DBRes<BotRecord[]> = dbFunctionWrapper(_getActiveBots);
+
+async function _getActiveStories(): Promise<StoryRecord[]> {
+    const activeBots = await sql `SELECT * FROM stories WHERE active > 0`;
+
+    return activeBots as StoryRecord[];
+}
+
+export const getActiveStories: () => DBRes<StoryRecord[]> = dbFunctionWrapper(_getActiveStories);
+
+async function _insertBotComment(botUsername: string, parentId: string, storyId: string, response: string): Promise<number>{
+
+    const commentId = getRandomCommentId();
+    const now = Math.floor(Date.now() / 1000);
+
+    await sql`
+        INSERT INTO comments (id, by, kids, parent, story_id, text, time, active, is_bot)
+        VALUES (${commentId}, ${botUsername}, '[]'::jsonb, ${parentId},
+         ${storyId},${response}, ${now}, true, true)
+    `;
+
+    return commentId;
+}
+
+export const insertBotComment: (botUsername: string, parentId: string, storyId: string, response: string) => DBRes<number> = dbFunctionWrapper<any, number>(_insertBotComment);
+
+async function _updateKids(storyId: string, newKids: number[], parentTable: ParentTable): Promise<boolean>{
+    await sql`
+      UPDATE ${parentTable}
+      SET kids = ${JSON.stringify(newKids)}::jsonb
+      WHERE id = ${storyId}
+    `;
+
+    return true
+}
+
+export const updateKids: (storyId: string, newKids: number[], parentTable: ParentTable) => DBRes<boolean> = dbFunctionWrapper<any, boolean>(_updateKids);
+
