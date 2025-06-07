@@ -17,7 +17,9 @@ import type { StoryWithComments, StoryCard, NestedComment } from "@/types";
 import CommentItem from "./CommentItem";
 import styles from "./Story.module.css";
 import {grabStoryCard, grabStoryComments} from "@/db/client";
-import {displayHost} from "@/lib/utils"
+import {displayHost} from "@/lib/utils";
+import { decode } from 'he';
+
 
 export default async function Story({
   params,
@@ -47,7 +49,7 @@ export default async function Story({
                 rel="noopener noreferrer"
                 className={styles.titleLink}
               >
-                {storyCard.title}
+                {decode(storyCard.title)}
               </a>
               {host && <span className={styles.domain}>({host})</span>}
             </div>

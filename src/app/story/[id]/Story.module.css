@@ -54,6 +54,12 @@
   font-size: 12.5pt;         /* ↑ a bit larger */
   white-space: pre-line;   /* keep linebreaks */
 }
+.commentBody a, 
+.commentBody a:hover {
+  text-decoration: underline;
+  color: #000000;
+
+}
 
 .commentBlock {
   margin-top: 10px;        /* more vertical spacing */

@@ -12,7 +12,7 @@ import type {
   CommentRecord,
   BotRecord,
   NestedComment,
-  ParentTable,
+  ContentTable,
   StoryWithComments
 } from "@/types";
 
@@ -72,7 +72,7 @@ async function read(bots: BotRecord[], story: StoryWithComments, commentChain: N
   }
 
   if(newKids.length > 0){
-    const parentTable: ParentTable = lastComment === undefined ? "stories" : "comments";
+    const parentTable: ContentTable = lastComment === undefined ? "stories" : "comments";
     await updateKids(story.id.toString(), [...reading.kids, ...newKids], parentTable);
   }
 

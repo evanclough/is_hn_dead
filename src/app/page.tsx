@@ -13,6 +13,7 @@ import type { FrontPage } from "@/types";
 import styles from "./StoryTable.module.css";
 import { getTimeString, displayHost } from "@/lib/utils";
 import {grabTopStories} from "@/db/client";
+import { decode } from 'he';
 
 export default async function HomePage() {
 
@@ -36,7 +37,7 @@ export default async function HomePage() {
                 <td className={styles.rank}>{idx + 1}.</td>
                 <td className={styles.titleLine}>
                   <a href={story.url ?? `/story/${story.id}`} className={styles.titleLink}>
-                    {story.title}
+                    {decode(story.title)}
                   </a>
                   {host && (
                     <span className={styles.domain}>({host})</span>

@@ -10,7 +10,7 @@ import {
     BotPerformance,
     StoryRecord,
     CommentRecord,
-    ParentTable
+    ContentTable
 } from "@/types";
 
 import {
@@ -26,6 +26,7 @@ function dbFunctionWrapper<T, R>(f: (...args1: (T[])) => Promise<R>): ((...args1
             const result = await f(...args2);
             return result as R;
         }catch (err){
+            console.log(err);
             return null;
         }
     }
@@ -229,7 +230,7 @@ async function _insertBotComment(botUsername: string, parentId: string, storyId:
 
 export const insertBotComment: (botUsername: string, parentId: string, storyId: string, response: string) => DBRes<number> = dbFunctionWrapper<any, number>(_insertBotComment);
 
-async function _updateKids(storyId: string, newKids: number[], parentTable: ParentTable): Promise<boolean>{
+async function _updateKids(storyId: string, newKids: number[], parentTable: ContentTable): Promise<boolean>{
     await sql`
       UPDATE ${parentTable}
       SET kids = ${JSON.stringify(newKids)}::jsonb
@@ -239,5 +240,105 @@ async function _updateKids(storyId: string, newKids: number[], parentTable: Pare
     return true
 }
 
-export const updateKids: (storyId: string, newKids: number[], parentTable: ParentTable) => DBRes<boolean> = dbFunctionWrapper<any, boolean>(_updateKids);
+export const updateKids: (storyId: string, newKids: number[], parentTable: ContentTable) => DBRes<boolean> = dbFunctionWrapper<any, boolean>(_updateKids);
 
+async function _deactivateFrontPage(): Promise<boolean>{
+    await sql`UPDATE stories SET active = -1`;
+    await sql`UPDATE comments SET active = FALSE`;
+
+    return true;
+}
+
+export const deactivateFrontPage: () => DBRes<boolean> = dbFunctionWrapper(_deactivateFrontPage);
+
+async function _grabStoryRecord(storyId: string): Promise<StoryRecord[]>{
+    const result = await sql`SELECT * FROM stories WHERE id = ${storyId}`;
+
+    return result as StoryRecord[];
+}
+
+export const grabStoryRecord: (storyId: string) => DBRes<StoryRecord[]> = dbFunctionWrapper(_grabStoryRecord);
+
+async function _grabCommentRecord(commentId: string): Promise<CommentRecord[]>{
+    const result = await sql`SELECT * FROM comments WHERE id = ${commentId}`;
+
+    return result as CommentRecord[];
+}
+
+export const grabCommentRecord: (storyId: string) => DBRes<CommentRecord[]> = dbFunctionWrapper(_grabCommentRecord);
+
+
+async function _insertStory(story: StoryRecord): Promise<boolean>{
+    await sql`
+        INSERT INTO stories (
+            id, by, kids, score, time, title, url, text, summary, active, last_activated
+        ) VALUES (
+            ${story.id},
+            ${story.by},
+            ${JSON.stringify(story.kids)},
+            ${story.score},
+            ${story.time},
+            ${story.title},
+            ${story.url},
+            ${story.text},
+            ${story.summary},
+            ${story.active},
+            ${story.last_activated}
+        )
+    `;
+
+    return true;
+}
+
+export const insertStory: (story: StoryRecord) => DBRes<boolean> = dbFunctionWrapper(_insertStory);
+
+async function _insertExistingComment(comment: CommentRecord): Promise<boolean>{
+    await sql`
+        INSERT INTO comments (
+            id, by, kids, parent, story_id, text, time, active, is_bot
+        ) VALUES (
+            ${comment.id},
+            ${comment.by},
+            ${JSON.stringify(comment.kids)},
+            ${comment.parent},
+            ${comment.story_id},
+            ${comment.text},
+            ${comment.time},
+            ${comment.active},
+            ${comment.is_bot}
+        )
+    `;
+    return true;
+}
+
+export const insertExistingComment: (comment: CommentRecord) => DBRes<boolean> = dbFunctionWrapper(_insertExistingComment);
+
+async function _refreshStory(storyId: string, kids: number[], score: number, rank: number): Promise<boolean>{
+    const now = Math.floor(Date.now() / 1000);
+
+    await sql`
+        UPDATE stories SET
+            kids = ${JSON.stringify(kids)},
+            score = ${score},
+            active = ${rank},
+            last_activated = ${now}
+        WHERE id = ${storyId}
+    `;
+    
+    return true;
+}
+
+export const refreshStoryRecord: (storyId: string, kids: number[], score: number, rank: number) => DBRes<boolean>  = dbFunctionWrapper<any, boolean>(_refreshStory);
+
+async function _refreshComment(commentId: string, kids: number[]): Promise<boolean>{
+    await sql`
+        UPDATE comments SET
+            kids = ${JSON.stringify(kids)},
+            active = TRUE
+        WHERE id = ${commentId}
+    `;
+
+    return true;
+}
+
+export const refreshCommentRecord: (commentId: string, kids: number[]) => DBRes<boolean> = dbFunctionWrapper<any, boolean>(_refreshComment);

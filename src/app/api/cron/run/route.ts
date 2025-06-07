@@ -19,9 +19,8 @@ export async function GET(req: Request) {
 
   try {
     const summary = await runCronPipeline();
-    return Response.json(summary);
+    return new Response("Cron success", { status: 200} )
   } catch (err) {
-    console.error("Cron pipeline failed", err);
     return new Response("Cron failed", { status: 500 });
   }
 }

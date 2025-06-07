@@ -3,25 +3,35 @@
  * like “42 seconds ago”, “5 minutes ago”, “3 hours ago”, or “2 days ago”.
  */
 export function getTimeString(unixSeconds: number): string {
-  const nowSeconds = Math.floor(Date.now() / 1000);
+  const nowSeconds = Date.now() / 1000;
   const diff = Math.max(nowSeconds - unixSeconds, 0); // guard against future dates
 
   if (diff < 60) {
-    return `${diff} second${diff === 1 ? "" : "s"} ago`;
+    return `${Math.floor(diff)} second${Math.floor(diff) === 1 ? "" : "s"} ago`;
   }
 
-  const minutes = Math.floor(diff / 60);
+  const minutes = diff / 60;
   if (minutes < 60) {
-    return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+    return `${Math.floor(minutes)} minute${Math.floor(minutes) === 1 ? "" : "s"} ago`;
   }
 
-  const hours = Math.floor(minutes / 60);
+  const hours = minutes / 60;
   if (hours < 24) {
-    return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+    return `${Math.floor(hours)} hour${Math.floor(hours) === 1 ? "" : "s"} ago`;
   }
 
-  const days = Math.floor(hours / 24);
-  return `${days} day${days === 1 ? "" : "s"} ago`;
+  const days = hours / 60;
+  if(days < 30){
+    return `${Math.floor(days)} day${Math.floor(days) === 1 ? "" : "s"} ago`;
+  }
+
+  const months = days / 30;
+  if (months < 12){
+    return `${Math.floor(months)} month${Math.floor(months) === 1 ? "" : "s"} ago`;
+  }
+
+  const years = months / 12;
+  return `${Math.floor(years)} year${Math.floor(years) === 1 ? "" : "s"} ago`;
 }
 
 /*
@@ -42,4 +52,9 @@ export function displayHost(urlStr: string | null): string | null {
   } catch {
     return null;
   }
+}
+const MAX_RANDOM_ID   = 40_000_000;
+
+export function getRandomCommentId(): number {
+  return 1 + Math.floor(Math.random() * MAX_RANDOM_ID);
 }

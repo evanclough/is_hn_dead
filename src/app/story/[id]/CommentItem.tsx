@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, JSX } from "react";
 import { getTimeString } from "@/lib/utils";
 import type { NestedComment } from "@/types";
 import styles from "./Story.module.css";
+import { decode } from 'he';
+import parse from 'html-react-parser';
+import sanitizeHtml from "sanitize-html";
+
 
 type Props = {
   comment: NestedComment;
@@ -13,6 +17,15 @@ type Props = {
   parentId: number | null;
   prevId: number | null;
   nextId: number | null;
+};
+
+function renderComment(plaintext: string): JSX.Element | JSX.Element[] | string {
+  const decodedPlaintext: string = decode(plaintext);
+  const sanitizedHTML: string = sanitizeHtml(decodedPlaintext, {
+    allowedTags: ['p', 'a', 'i'],
+    allowedAttributes: { a: ['href', 'target', 'rel'] }
+  })
+  return parse(sanitizedHTML);
 };
 
 function countDesc(c: NestedComment): number {
@@ -147,7 +160,7 @@ export default function CommentItem({
       {/* body + guess + children */}
       {!collapsed && (
         <>
-          <div className={styles.commentBody}>{comment.text}</div>
+          <div className={styles.commentBody}>{renderComment(comment.text)}</div>
 
           <div className={styles.commentSubtext}>
             {guessed ? (

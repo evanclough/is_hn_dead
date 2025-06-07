@@ -46,7 +46,7 @@ export type CommentRecord = {
     kids: number[];
     parent: number;
     story_id: number;
-    text: string | null;
+    text: string;
     time: number;
     active: boolean;
     is_bot: boolean;
@@ -89,4 +89,4 @@ export type BotPerformance = {
 
 export type DBRes<T> = Promise<T | null>;
 
-export type ParentTable = "stories" | "comments";
+export type ContentTable = "stories" | "comments";
