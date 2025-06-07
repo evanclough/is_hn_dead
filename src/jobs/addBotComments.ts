@@ -7,23 +7,42 @@ import {
    updateKids,
    } from "@/db/client";
 
-import type {
+import {
   StoryRecord,
   CommentRecord,
   BotRecord,
   NestedComment,
   ContentTable,
-  StoryWithComments
+  StoryWithComments,
+  WhenMethodName,
+  WhenMethod,
+  WhatMethodName,
+  WhatMethod,
+  FunctionalBot,
 } from "@/types";
+
+import {
+  getWhenMethod,
+  getWhatMethod
+} from "@/bot_methods";
 
 
 export async function addBotComments(): Promise<boolean> {
-  const bots: BotRecord[] | null = await getActiveBots();
+  const botRecords: BotRecord[] | null = await getActiveBots();
   const activeStories: StoryRecord[] | null = await getActiveStories();
 
-  if (bots === null || activeStories == null){
+  if (botRecords === null || activeStories == null){
     return false;
   }
+
+  const bots: FunctionalBot[] = botRecords.map((bot: BotRecord) => {
+    return {
+      ...bot,
+      whenMethod: getWhenMethod(bot.when_method_name),
+      whatMethod: getWhatMethod(bot.what_method_name)
+    } as FunctionalBot;
+  })
+
 
   let success: boolean = true;
 
@@ -43,18 +62,8 @@ export async function addBotComments(): Promise<boolean> {
   return success;
 }
 
-const BOT_REPLY_CHANCE = 0.03;
 
-function willMakeResponse(bot: BotRecord, story: StoryRecord, chain: CommentRecord[]): boolean {
-  return Math.random() < BOT_REPLY_CHANCE;
-}
-
-function generateResponse(bot: BotRecord, story: StoryRecord, chain: CommentRecord[]): string {
-  return `Bot ${bot.username} commenting on “${story.title}”.`;
-}
-
-
-async function read(bots: BotRecord[], story: StoryWithComments, commentChain: NestedComment[]): Promise<boolean>{
+async function read(bots: FunctionalBot[], story: StoryWithComments, commentChain: NestedComment[]): Promise<boolean>{
   const lastComment: NestedComment | undefined = commentChain.at(-1);
 
   const reading: NestedComment | StoryWithComments = lastComment ?? story;
@@ -62,8 +71,8 @@ async function read(bots: BotRecord[], story: StoryWithComments, commentChain: N
   const newKids: number[] = [];
 
   for(const bot of bots){
-    if(willMakeResponse(bot, story, commentChain)){
-      const response: string = generateResponse(bot, story, commentChain);
+    if(await bot.whenMethod(bot, story, commentChain)){
+      const response: string = await bot.whatMethod(bot, story, commentChain);
       const newResponseId: number | null = await insertBotComment(bot.username, reading.id.toString(), story.id.toString(), response);
       if(newResponseId !== null){
         newKids.push(newResponseId);
@@ -73,7 +82,7 @@ async function read(bots: BotRecord[], story: StoryWithComments, commentChain: N
 
   if(newKids.length > 0){
     const parentTable: ContentTable = lastComment === undefined ? "stories" : "comments";
-    await updateKids(story.id.toString(), [...reading.kids, ...newKids], parentTable);
+    await updateKids(reading.id.toString(), [...reading.kids, ...newKids], parentTable);
   }
 
   let success = true;

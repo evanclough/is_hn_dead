@@ -62,8 +62,12 @@ export default async function BotPage({
                 <td>{bot.llm}</td>
               </tr>
               <tr>
-                <td>method:</td>
-                <td>{bot.method}</td>
+                <td>when method:</td>
+                <td>{bot.when_method_name}</td>
+              </tr>
+              <tr>
+                <td>what method:</td>
+                <td>{bot.what_method_name}</td>
               </tr>
               <tr>
                 <td>total guesses:</td>

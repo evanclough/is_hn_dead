@@ -44,14 +44,14 @@ CREATE INDEX IF NOT EXISTS idx_comments_story
 /* ─────────── BOTS ─────────── */
 
 CREATE TABLE IF NOT EXISTS bots (
-    username    TEXT PRIMARY KEY,
-    llm         TEXT,
-    method      TEXT,
-    personality JSONB,
-    created     BIGINT,
-    active      BOOLEAN DEFAULT FALSE
+    username           TEXT PRIMARY KEY,
+    llm                TEXT,
+    created            BIGINT,
+    active             BOOLEAN DEFAULT FALSE,
+    when_method_name   TEXT,      -- add DEFAULT 'test' if you want automatic population
+    what_method_name   TEXT,      -- add DEFAULT 'test' if you want automatic population
+    context            TEXT
 );
-
 
 /* ─────────── GUESSES ─────────── */
 

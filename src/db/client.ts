@@ -231,12 +231,21 @@ async function _insertBotComment(botUsername: string, parentId: string, storyId:
 export const insertBotComment: (botUsername: string, parentId: string, storyId: string, response: string) => DBRes<number> = dbFunctionWrapper<any, number>(_insertBotComment);
 
 async function _updateKids(storyId: string, newKids: number[], parentTable: ContentTable): Promise<boolean>{
-    await sql`
-      UPDATE ${parentTable}
-      SET kids = ${JSON.stringify(newKids)}::jsonb
-      WHERE id = ${storyId}
-    `;
 
+    if(parentTable === "stories"){
+        await sql`
+            UPDATE stories
+            SET kids = ${JSON.stringify(newKids)}::jsonb
+            WHERE id = ${storyId}
+            `;
+    }else{
+        await sql`
+            UPDATE comments
+            SET kids = ${JSON.stringify(newKids)}::jsonb
+            WHERE id = ${storyId}
+            `;
+    }
+    
     return true
 }
 

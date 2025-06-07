@@ -74,11 +74,14 @@ export type GuessRecord = {
 export type BotRecord = {
     username: string;
     llm: string;
-    method: string;
-    personality: any; // JSON object, you can type this further if you want
+    when_method_name: WhenMethodName;
+    what_method_name: WhatMethodName;
+    context: string; 
     created: number;
     active: boolean;
 };
+
+export type FunctionalBot = BotRecord & {whenMethod: WhenMethod, whatMethod: WhatMethod};
 
 export type BotPerformance = {
   username: string;
@@ -90,3 +93,10 @@ export type BotPerformance = {
 export type DBRes<T> = Promise<T | null>;
 
 export type ContentTable = "stories" | "comments";
+
+export type WhenMethodName = "test";
+
+export type WhatMethodName = "test" | "testOpenAI";
+
+export type WhenMethod = (bot: BotRecord, story: StoryRecord, commentChain: CommentRecord[]) => Promise<boolean>;
+export type WhatMethod = (bot: BotRecord, story: StoryRecord, commentChain: CommentRecord[]) => Promise<string>;
