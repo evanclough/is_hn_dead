@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^0.10.4",
+    "@neondatabase/serverless": "^1.0.1",
     "clsx": "^2.1.1",
     "he": "^1.2.0",
     "html-react-parser": "^5.2.5",

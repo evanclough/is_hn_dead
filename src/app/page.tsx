@@ -12,7 +12,7 @@ import React from "react";
 import type { FrontPage } from "@/types";
 import styles from "./StoryTable.module.css";
 import { getTimeString, displayHost } from "@/lib/utils";
-import {grabTopStories} from "@/db/client";
+import {grabTopStories} from "@/lib/db";
 import { decode } from 'he';
 
 export default async function HomePage() {

@@ -16,7 +16,7 @@ import { getTimeString } from "@/lib/utils";
 import type { StoryWithComments, StoryCard, NestedComment } from "@/types";
 import CommentItem from "./CommentItem";
 import styles from "./Story.module.css";
-import {grabStoryCard, grabStoryComments} from "@/db/client";
+import {grabStoryCard, grabStoryComments} from "@/lib/db";
 import {displayHost} from "@/lib/utils";
 import { decode } from 'he';
 

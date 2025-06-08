@@ -4,7 +4,7 @@ export type AlgoliaItem = {
     author: string;
     children: AlgoliaItem[];
     created_at: string;
-    created_at_i: number; // unix timestamp
+    created_at_i: number;
     id: number;
     options: any[];
     parent_id: number | null;
@@ -15,6 +15,28 @@ export type AlgoliaItem = {
     type: string;
     url: string | null;
 };
+
+export type AlgoliaStory = {
+    author: string;
+    children: AlgoliaComment[];
+    created_at_i: number; 
+    id: number;
+    points: number;
+    story_id: number;
+    text: string | null;
+    title: string;
+    url: string | null;
+}
+
+export type AlgoliaComment = {
+    author: string;
+    children: AlgoliaComment[];
+    created_at_i: number;
+    id: number;
+    parent_id: number;
+    story_id: number;
+    text: string;
+}
 
 export type AlgoliaError = {
     error: string;
@@ -93,6 +115,8 @@ export type BotPerformance = {
 export type DBRes<T> = Promise<T | null>;
 
 export type ContentTable = "stories" | "comments";
+
+export type SearchByPK<T> = [boolean, T | null];
 
 export type WhenMethodName = "test";
 

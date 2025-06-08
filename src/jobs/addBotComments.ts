@@ -5,7 +5,7 @@ import {
    grabStoryComments,
    insertBotComment,
    updateKids,
-   } from "@/db/client";
+   } from "@/lib/db";
 
 import {
   StoryRecord,
@@ -50,8 +50,7 @@ export async function addBotComments(): Promise<boolean> {
     const comments: NestedComment[] | null = await grabStoryComments(storyRecord.id.toString());
 
     if(comments === null){
-      success = false;
-      continue;
+      return false;
     }
 
     const story: StoryWithComments = {...storyRecord, comments}
@@ -73,8 +72,8 @@ async function read(bots: FunctionalBot[], story: StoryWithComments, commentChai
   for(const bot of bots){
     if(await bot.whenMethod(bot, story, commentChain)){
       const response: string = await bot.whatMethod(bot, story, commentChain);
-      const newResponseId: number | null = await insertBotComment(bot.username, reading.id.toString(), story.id.toString(), response);
-      if(newResponseId !== null){
+      const newResponseId: number = await insertBotComment(bot.username, reading.id.toString(), story.id.toString(), response);
+      if(newResponseId !== -1){
         newKids.push(newResponseId);
       }
     }
@@ -91,5 +90,5 @@ async function read(bots: FunctionalBot[], story: StoryWithComments, commentChai
     success &&= await read(bots, story, [...commentChain, comment]);
   }
 
-  return true;
+  return success;
 }

@@ -1,15 +1,29 @@
 import { addFrontPage, refreshFrontPage  } from "./refreshTopStories";
 import { addBotComments }    from "./addBotComments";
-import { pruneOldStories } from "@/db/client";
+import { pruneOldStories } from "@/lib/db";
+
+import {
+    CRON_PERIOD_SECONDS,
+    NUM_DAYS_KEPT
+} from "@/lib/constants";
 
 export async function runCronPipeline(): Promise<void> {
 
-    const CRON_PERIOD_MINUTES: number = parseInt(process.env.CRON_PERIOD_MINUTES!);
 
-    const NUM_DAYS_KEPT = 3;
-
+    console.log(`starting cronjob...`);
     //await addFrontPage();
-    //await refreshFrontPage(CRON_PERIOD_MINUTES * 60);
-    await addBotComments();
-    await pruneOldStories(NUM_DAYS_KEPT);
+
+    console.log(`refreshing database with last ${CRON_PERIOD_SECONDS / 60} minutes of HN data...`);
+    const refreshSuccess: boolean = await refreshFrontPage();
+    console.log(`refresh ${refreshSuccess ? "succeeded" : "failed"}`);
+
+    console.log(`showing front page to bots`);
+    console.log(`bots successfully read front page`);
+
+    console.log(`removing all stories and comments more than ${NUM_DAYS_KEPT} days old...`);
+    const pruneSuccess: boolean = await pruneOldStories();
+    console.log(`removal ${pruneSuccess ? "succeeded" : "failed"}`);
+
+    console.log(`successfully completed cronjob`);
+    
 }

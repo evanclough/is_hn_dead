@@ -13,7 +13,7 @@
 
 
 import { NextRequest, NextResponse } from "next/server";
-import { sql, makeGuess } from "@/db/client";
+import { sql, makeGuess } from "@/lib/db";
 
 export const config = { runtime: "edge" };
 

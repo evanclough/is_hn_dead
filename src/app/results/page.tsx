@@ -14,8 +14,12 @@
 */
 
 
-import { grabTopBots } from "@/db/client";
+import { grabTopBots } from "@/lib/db";
 import { DBRes, BotPerformance } from "@/types"
+
+import {
+  NUM_TOP_BOTS
+} from "@/lib/constants";
 
 type ResultsPayload = {
   totalCorrect: number;
@@ -31,7 +35,7 @@ export default async function ResultsPage() {
     <main>
       <h1>Results</h1>
 
-      <h2>Top 5 Bots by Incorrect Ratio</h2>
+      <h2>Top {NUM_TOP_BOTS} Bots by Incorrect Ratio</h2>
       {topBots === null ? (
         <p>Error fetching results.</p>
       ) : (

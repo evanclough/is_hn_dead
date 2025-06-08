@@ -13,7 +13,7 @@
 
 import type { BotRecord, CommentWithGuessCounts, Guesses } from "@/types";
 import styles from "./BotPage.module.css";
-import { grabBotRecord, grabBotComments } from "@/db/client";
+import { grabBotRecord, grabBotComments } from "@/lib/db";
 
 export default async function BotPage({
   params,
