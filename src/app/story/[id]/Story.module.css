@@ -2,12 +2,12 @@
 
 .container {
   /* slimmer top padding, same left/right/bottom */
-  padding: 0.5rem 1rem 1rem;
+  padding: 0 1.5rem 1.5rem;
 }
 
 /* ─── Title line ─── */
 .titleLine {
-  font-size: 13pt;
+  font-size: 15pt;
   line-height: 1.3;
 }
 
@@ -29,7 +29,7 @@
 
 /* ─── points / author line ─── */
 .subtext {
-  font-size: 12pt;        /* a bit larger */
+  font-size: 11pt;        /* a bit larger */
   color: #828282;
   line-height: 1.3;
   padding: 2px 0;         /* ↑ extra top / bottom space */
@@ -44,25 +44,66 @@
   text-decoration: underline;
 }
 
-.commentSubtext {
-  font-size: 10pt;        /* a bit larger */
+.mainText {
+  font-size: 13pt;
   color: #828282;
-  padding: 5px 0;         /* ↑ extra top / bottom space */
+  margin: 1rem 0rem;
 }
+
+.mainText a,
+.mainText a:hover{
+  color: #000000;
+  text-decoration: underline;
+}
+
+.fakeTextBox {
+  margin: 1rem 0.2rem;
+}
+
+.fakeTextArea {
+  width: 60%;
+  height: 10rem;
+  resize: none;
+  font-size: 10pt;
+}
+
+.commentsBlock {
+  margin-top: 1rem;
+}
+
+.commentSubtext {
+  font-size: 11pt;        /* a bit larger */
+  color: #828282;
+  padding: 6px 0;         /* ↑ extra top / bottom space */
+}
+
+
 
 .commentBody {
   font-size: 12.5pt;         /* ↑ a bit larger */
   white-space: pre-line;   /* keep linebreaks */
 }
 .commentBody a, 
-.commentBody a:hover {
+.commentBody a:hover{
   text-decoration: underline;
   color: #000000;
 
 }
 
+.commentBody p {
+  margin: 0.5rem 0;
+}
+
 .commentBlock {
-  margin-top: 10px;        /* more vertical spacing */
+  margin-top: 4px;        /* more vertical spacing */
+  margin-bottom: 6px;
+  margin-left: min(calc(var(--level) * 16px), 300px);
+}
+
+@media (max-width: 750px) {
+  .item {
+    margin-left: min(calc(var(--level) * 16px), 150px);
+  }
 }
 
 

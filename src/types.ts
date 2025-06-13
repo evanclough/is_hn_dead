@@ -52,7 +52,6 @@ export type StoryRecord = {
     title: string;
     url: string | null;
     text: string | null;
-    summary: string;
     active: number;
     last_activated: number;
 };

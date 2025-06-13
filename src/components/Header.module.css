@@ -1,46 +1,60 @@
 /* components/Header.module.css */
 
+/* 1. HEADER CONTAINER ──────────────────────────────────────────────── */
 .header {
   background-color: #ff6600;
-  padding: 0.15rem;          /* slimmer top/bottom */
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  padding: 0.15rem;
+  display: flex;             /* [robot] [title+links] */
+  align-items: center;       /* centers the title+links block vertically */
+  column-gap: 0.75rem;
 }
 
-/* Robot badge */
+/* 2. ROBOT BADGE (square, left) ───────────────────────────────────── */
+.robotLink {
+  display: flex;             /* make the whole square clickable */
+}
+
 .robotBadge {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   width: 1.6rem;
-  height: 1.6rem;
+  height: 1.6rem;            /* forces a perfect square */
   border: 1px solid #ffffff;
-  border-radius: 0;
-  font-size: 1.1rem;              /* the emoji itself */
+  font-size: 1.1rem;
   line-height: 1;
   user-select: none;
 }
 
-/* Title: “Hacker News?” */
+/* 3. TITLE + LINKS BLOCK ──────────────────────────────────────────── */
+/* — Default: desktop (> 750 px) — title and links sit on one row */
+.navBlock {
+  display: flex;
+  align-items: center;       /* vertical centering inside the row */
+  column-gap: 0.6rem;        /* horizontal space between title & links */
+  flex: 1 1 auto;
+}
+
+/* Title link */
 .title,
 .title:hover,
 .title:focus,
 .title:active,
 .title:visited {
   margin: 0;
-  font-size: 13pt;                /* HN uses 10 pt in the header */
+  font-size: 14pt;
   font-weight: 700;
-  color: #000000;
-  text-decoration:none
+  color: #000;
+  text-decoration: none;
 }
 
-/* Horizontal link group: results | writeup | source */
+/* Links container */
 .links {
   display: flex;
+  flex-wrap: wrap;           /* wraps naturally on narrow widths */
   align-items: center;
   gap: 0.4rem;
-  font-size: 13pt;                /* same 10 pt as HN nav links */
+  font-size: 13pt;
 }
 
 .link,
@@ -48,11 +62,20 @@
 .link:focus,
 .link:active,
 .link:visited {
-  color: #000000;
+  color: #000;
   text-decoration: none;
 }
 
 .pipe {
   user-select: none;
   pointer-events: none;
+}
+
+/* 4. MOBILE / TABLET STACK (≤ 750 px) ─────────────────────────────── */
+@media (max-width: 750px) {
+  .navBlock {
+    flex-direction: column;  /* stack title over links */
+    align-items: flex-start; /* align to left edge */
+    row-gap: 0.05rem;        /* tight vertical spacing */
+  }
 }

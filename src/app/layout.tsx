@@ -1,16 +1,11 @@
-/*
-
-  Container for the whole frontend, shows the header at the top.
-
-*/
 import "@/app/globals.css";
 import Header from "@/components/Header";
-import styles from "./AppBox.module.css";
+import styles from "./Container.module.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "HN Clone",
-  description: "A Hacker-News-style site with AI bots",
+  title: "Is Hacker News Dead?",
+  description: "An experiment on the validity of the Dead Internet Theory, performed on Hacker News.",
 };
 
 export default function RootLayout({
@@ -26,7 +21,6 @@ export default function RootLayout({
       <body>
         <div className={styles.container}>
           <Header />
-
           <main className={styles.main}>{children}</main>
         </div>
       </body>

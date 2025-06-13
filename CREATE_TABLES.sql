@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS stories (
     title          TEXT,
     url            TEXT,
     text           TEXT,
-    summary        TEXT,
     active         INTEGER DEFAULT -1,
     last_activated BIGINT
 );

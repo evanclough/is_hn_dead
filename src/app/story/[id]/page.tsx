@@ -1,24 +1,24 @@
-/*
-
-  FRONTEND PAGE: /story/[id]
-
-  Displays a story page, supposed to look almost exactly like that of HN,
-  without the upvote button / comment submission box,
-  and with the human / bot guesses.
-
-  State should be just the storys record along with all of the comments.
-
-*/
-
-
 import React from "react";
-import { getTimeString } from "@/lib/utils";
-import type { StoryWithComments, StoryCard, NestedComment } from "@/types";
-import CommentItem from "./CommentItem";
-import styles from "./Story.module.css";
-import {grabStoryCard, grabStoryComments} from "@/lib/db";
-import {displayHost} from "@/lib/utils";
 import { decode } from 'he';
+
+import styles from "./Story.module.css";
+import CommentItem from "./CommentItem";
+
+import type { 
+  StoryCard, 
+  NestedComment 
+} from "@/types";
+import { 
+  getTimeString
+} from "@/lib/utils";
+import {
+  grabStoryCard, 
+  grabStoryComments
+} from "@/lib/db";
+import {
+  displayHost,
+  renderHTML
+} from "@/lib/utils";
 
 
 export default async function Story({
@@ -36,12 +36,12 @@ export default async function Story({
 
   return (
     <main className={styles.container}>
-      {/* story header block */}
+
         {
           storyCard === null ? 
             <p>error fetching story card</p>
           :
-          <React.Fragment>
+          <div>
             <div className={styles.titleLine}>
               <a
                 href={storyCard.url ?? "#"}
@@ -54,20 +54,28 @@ export default async function Story({
               {host && <span className={styles.domain}>({host})</span>}
             </div>
             <div className={styles.subtext}>
-              {storyCard.score} points by {storyCard.by} {getTimeString(storyCard.time)}
+              {storyCard.score} points by {storyCard.by} {getTimeString(storyCard.time)} | {storyCard.descendants} comment{storyCard.descendants === 1 ? "" : "s"}
             </div>
-          </React.Fragment>
+            {storyCard.text !== null && 
+              <div className={styles.mainText}>
+                {renderHTML(storyCard.text)}
+              </div>
+            }
+            <div className={styles.fakeTextBox}>
+              <textarea defaultValue={`to make a comment, head over to the real post at https://news.ycombinator.com/item?id=${storyCard.id}`}className={styles.fakeTextArea} disabled></textarea>
+            </div>
+          </div>
         }
-        {/* comments */}
+
         <div className={styles.commentsBlock}>
           {
             comments === null ? 
               <p> error fetching comments</p>
             :
-              comments!.length === 0 ? (
+              comments.length === 0 ? (
                 <div>no comments yet.</div>
               ) : (
-                comments!.map((root, i) => (
+                comments.map((root, i) => (
                   <CommentItem
                     key={root.id}
                     comment={root}

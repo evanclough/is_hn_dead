@@ -1,10 +1,13 @@
-/**
- * Convert a Unix-epoch seconds timestamp into a relative‐time string
- * like “42 seconds ago”, “5 minutes ago”, “3 hours ago”, or “2 days ago”.
- */
+
+import { decode } from 'he';
+import parse from 'html-react-parser';
+import sanitizeHtml from "sanitize-html";
+
+import {JSX} from "react";
+
 export function getTimeString(unixSeconds: number): string {
   const nowSeconds = Date.now() / 1000;
-  const diff = Math.max(nowSeconds - unixSeconds, 0); // guard against future dates
+  const diff = Math.max(nowSeconds - unixSeconds, 0); 
 
   if (diff < 60) {
     return `${Math.round(diff)} second${Math.round(diff) === 1 ? "" : "s"} ago`;
@@ -56,3 +59,12 @@ export function displayHost(urlStr: string | null): string | null {
 export function getRandomCommentId(): number {
   return 100_000_000 + Math.floor(Math.random() * 100_000_000);
 }
+
+export function renderHTML(plaintext: string): JSX.Element | JSX.Element[] | string {
+  const decodedPlaintext: string = decode(plaintext);
+  const sanitizedHTML: string = sanitizeHtml(decodedPlaintext, {
+    allowedTags: ['p', 'a', 'i'],
+    allowedAttributes: { a: ['href', 'target', 'rel'] }
+  })
+  return parse(sanitizedHTML);
+};

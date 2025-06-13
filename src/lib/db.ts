@@ -48,7 +48,6 @@ export async function grabTopStories(): Promise<FrontPage | null> {
             s.title,
             s.url,
             s.text,
-            s.summary,
             s.active,
             s.last_activated,
             COUNT(c.id)::int AS descendants         -- comment total
@@ -58,7 +57,7 @@ export async function grabTopStories(): Promise<FrontPage | null> {
             WHERE s.active > 0
             GROUP BY
             s.id, s.by, s.kids, s.score, s.time,
-            s.title, s.url, s.text, s.summary,
+            s.title, s.url, s.text,
             s.active, s.last_activated
             ORDER BY s.active ASC                     -- rank 1,2,3…
         ` as FrontPage;
@@ -344,7 +343,7 @@ export async function insertStory(story: StoryRecord): Promise<boolean>{
     try {
         const [{id}] = await sql`
             INSERT INTO stories (
-                id, by, kids, score, time, title, url, text, summary, active, last_activated
+                id, by, kids, score, time, title, url, text,  active, last_activated
             ) VALUES (
                 ${story.id},
                 ${story.by},
@@ -354,7 +353,6 @@ export async function insertStory(story: StoryRecord): Promise<boolean>{
                 ${story.title},
                 ${story.url},
                 ${story.text},
-                ${story.summary},
                 ${story.active},
                 ${story.last_activated}
             )

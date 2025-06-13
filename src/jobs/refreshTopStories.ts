@@ -40,7 +40,6 @@ async function insertAlgoliaStory(algoliaStory: AlgoliaStory, kids: number[], ra
             title: algoliaStory.title,
             url: algoliaStory.url,
             text: algoliaStory.text,
-            summary: summarize(algoliaStory.url, algoliaStory.text),
             active: rank,
             last_activated: now
         };
@@ -153,12 +152,6 @@ async function fetchTopStoryIds(): Promise<number[] | null>{
     return topStoryIdList;
 }
 
-function summarize(url: string | null, text: string | null) {
-    if (url && text) return url + " " + text;
-    if (url) return url;
-    if (text) return text;
-    return "";
-}
 
 async function fetchCurrentFrontPage(): Promise<AlgoliaStory[] | null>{
     const topStoryIds: number[] | null = await fetchTopStoryIds();

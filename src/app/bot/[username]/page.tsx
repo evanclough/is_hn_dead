@@ -1,26 +1,21 @@
-/*
-
-  FRONTEND PAGE: /bot/[username]
-
-  Displays the data from the bots record from the database,
-  along with their guess counts, and the ratio of incorrect guesses to all, 
-  called "deception score"
-
-  TODO: integrate with separated endpoints, fix state
-
-*/
-
-
-import type { BotRecord, CommentWithGuessCounts, Guesses } from "@/types";
 import styles from "./BotPage.module.css";
-import { grabBotRecord, grabBotComments } from "@/lib/db";
+
+import type { 
+  BotRecord, 
+  CommentWithGuessCounts, 
+  Guesses 
+} from "@/types";
+import { 
+  grabBotRecord,
+  grabBotComments 
+} from "@/lib/db";
 
 export default async function BotPage({
   params,
 }: {
   params: Promise<{ username: string }>;
 }) {
-  // await params before using .username
+
   const { username } = await params;
 
   const bot: BotRecord | null = await grabBotRecord(username);
@@ -42,7 +37,6 @@ export default async function BotPage({
 
   return (
     <div className={styles.container}>
-      {/* main profile box */}
       {
         bot === null ? 
           <p>error fetching bot profile</p>
@@ -78,13 +72,13 @@ export default async function BotPage({
                 <td>{(deception * 100).toFixed(3)} %</td>
               </tr>
               <tr>
-                <td>personality:</td>
-                <td>{/* kept empty for now */}</td>
+                <td>context:</td>
+                <td>{bot.context}</td>
               </tr>
             </tbody>
           </table>
       }
-      {/* comments section */}
+
       <h2 className={styles.commentsHeader}>comments</h2>
 
       {botComments === null ? 
@@ -94,7 +88,7 @@ export default async function BotPage({
           <p>none</p>
         : 
           <ul className={styles.commentList}>
-            {botComments!.map((c) => (
+            {botComments.map((c) => (
               <li key={c.id} className={styles.commentItem}>
                 <div className={styles.commentMeta}>
                   {new Date(c.time * 1000).toLocaleString()} &nbsp;|&nbsp; human

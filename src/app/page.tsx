@@ -1,13 +1,3 @@
-/*
-
-  FRONTEND PAGE: /
-
-  Displays what should be an almost exact clone of the hacker news front page,
-  without the upvote button.
-
-  State should just be the list of story records, along with their descendant counts.
-
-*/
 import React from "react";  
 import type { FrontPage } from "@/types";
 import styles from "./StoryTable.module.css";
@@ -30,9 +20,9 @@ export default async function HomePage() {
           const host: string | null = displayHost(story.url);
 
           return (
-            /* React fragment because each story is three separate <tr>s */
+            
             <React.Fragment key={story.id}>
-              {/* ─── row 1: rank + title line ─── */}
+              
               <tr>
                 <td className={styles.rank}>{idx + 1}.</td>
                 <td className={styles.titleLine}>
@@ -44,19 +34,19 @@ export default async function HomePage() {
                   )}
                 </td>
               </tr>
-
-              {/* ─── row 2: points line ─── */}
+              
               <tr>
-                <td /> {/* empty cell under rank */}
+                <td>&nbsp;</td>
                   <td className={styles.subtext}>
-                    {story.score} points by {story.by} {getTimeString(story.time)}  | <a className={styles.subtextLink} href={`/story/${story.id}`}>{story.descendants} comment{story.descendants > 0 ? "s" : ""} </a>
+                    {story.score} points by {story.by} {getTimeString(story.time)}  | <a className={styles.subtextLink} href={`/story/${story.id}`}>{story.descendants} comment{story.descendants === 1 ? "" : "s"} </a>
                   </td>
               </tr>
 
-              {/* spacer row for visual separation */}
+              
               <tr className={styles.spacer}>
                 <td colSpan={2} />
               </tr>
+
             </React.Fragment>
           );
         })}
