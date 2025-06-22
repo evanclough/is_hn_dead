@@ -9,15 +9,10 @@ import {
 
 import {
   StoryRecord,
-  CommentRecord,
   BotRecord,
   NestedComment,
   ContentTable,
   StoryWithComments,
-  WhenMethodName,
-  WhenMethod,
-  WhatMethodName,
-  WhatMethod,
   FunctionalBot,
 } from "@/types";
 

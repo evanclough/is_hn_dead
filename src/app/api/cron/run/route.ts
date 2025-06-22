@@ -8,9 +8,10 @@ export async function GET(req: Request) {
   }
 
   try {
-    const success = await runCronPipeline();
-    return new Response("Cron success", { status: 200} )
+    await runCronPipeline();
+    return new Response("Cron success", { status: 200} );
   } catch (err) {
+    console.error(err);
     return new Response("Cron failed", { status: 500 });
   }
 }

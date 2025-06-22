@@ -1,11 +1,9 @@
 import { neon } from "@neondatabase/serverless";
 import {
-    DBRes,
     FrontPage, 
     StoryCard,
     NestedComment,
     BotRecord,
-    Guesses,
     CommentWithGuessCounts,
     BotPerformance,
     StoryRecord,
@@ -33,8 +31,6 @@ type Count = CountObject[];
 type IDObject = {id: number};
 type ID = IDObject[];
 
-type UsernameObject = {username: string};
-type Username = Username[];
 
 export async function grabTopStories(): Promise<FrontPage | null> {
     try {

@@ -15,18 +15,11 @@
 
 
 import { grabTopBots } from "@/lib/db";
-import { DBRes, BotPerformance } from "@/types"
+import { BotPerformance } from "@/types"
 
 import {
   NUM_TOP_BOTS
 } from "@/lib/constants";
-
-type ResultsPayload = {
-  totalCorrect: number;
-  totalIncorrect: number;
-  topBots: { username: string; incorrectRatio: number }[];
-};
-
 export default async function ResultsPage() {
 
   const topBots: BotPerformance[] | null = await grabTopBots();

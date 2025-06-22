@@ -5,20 +5,15 @@ import {
     insertStory,
     refreshStoryRecord,
     refreshCommentRecord,
-    insertComment,
-    updateKids,
+    insertComment
  } from "@/lib/db";
-import type { 
-    AlgoliaItem,
-    AlgoliaError,
+import type {
     AlgoliaStory,
     AlgoliaComment,
     StoryRecord,
     CommentRecord,
-    ContentTable,
     SearchByPK,
-
-     } from "@/types";
+} from "@/types";
 
 import {
     CRON_PERIOD_SECONDS,

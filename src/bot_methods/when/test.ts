@@ -1,7 +1,4 @@
 import {
-    BotRecord,
-    StoryRecord,
-    CommentRecord,
     WhenMethod
 } from "@/types";
 
