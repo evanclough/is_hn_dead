@@ -16,7 +16,7 @@ export const testOpenAI: WhatMethod = async  (bot, story, chain) => {
         Please make your response in plaintext, with no markdown, formatting, or emojis.
     `
 
-    let prompt: string = chain.length === 0 ? 
+    const prompt: string = chain.length === 0 ? 
         `Make a comment in response to a story with this title: ${story.title}` : 
         `Make a comment in response to this comment: ${chain.at(-1)?.text}, with 
             the following comments preceding it: ${chain.slice(0, -1).join("\n")},
