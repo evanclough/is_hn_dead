@@ -67,6 +67,7 @@ async function read(bots: FunctionalBot[], story: StoryWithComments, commentChai
   for(const bot of bots){
     if(await bot.whenMethod(bot, story, commentChain)){
       const response: string = await bot.whatMethod(bot, story, commentChain);
+      console.log(`Bot ${bot.username} adding comment ${response}`);
       const newResponseId: number = await insertBotComment(bot.username, reading.id.toString(), story.id.toString(), response);
       if(newResponseId !== -1){
         newKids.push(newResponseId);

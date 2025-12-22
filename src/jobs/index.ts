@@ -1,5 +1,5 @@
 import { 
-    //addFrontPage,
+    addFrontPage,
     refreshFrontPage,  
 } from "./refreshTopStories";
 import { addBotComments }    from "./addBotComments";
@@ -14,7 +14,7 @@ export async function runCronPipeline(): Promise<boolean> {
 
     console.log(`starting cronjob...`);
     console.log(`refreshing database with last ${CRON_PERIOD_SECONDS / 60} minutes of HN data...`);
-    const refreshSuccess: boolean = await refreshFrontPage();
+    const refreshSuccess: boolean = await addFrontPage();
     console.log(`refresh ${refreshSuccess ? "succeeded" : "failed"}`);
 
     console.log(`showing front page to bots`);

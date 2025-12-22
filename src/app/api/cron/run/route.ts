@@ -1,5 +1,5 @@
 import { runCronPipeline } from "@/jobs";
-export const config = { runtime: "edge" };
+import { revalidatePath } from 'next/cache';
 
 export async function GET(req: Request) {
   const token = req.headers.get("authorization")?.replace("Bearer ", "");
@@ -9,6 +9,7 @@ export async function GET(req: Request) {
 
   try {
     await runCronPipeline();
+    revalidatePath('/', 'layout');
     return new Response("Cron success", { status: 200} );
   } catch (err) {
     console.error(err);
