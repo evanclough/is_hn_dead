@@ -7,14 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "local:frontpage": "tsx scripts/cron.ts frontpage",
-    "local:frontpage:refresh": "tsx scripts/cron.ts frontpage:refresh",
-    "local:bots": "tsx scripts/cron.ts bots",
-    "local:prune": "tsx scripts/cron.ts prune",
-    "local:seed": "tsx scripts/cron.ts seed",
-    "local:refresh": "tsx scripts/cron.ts refresh",
-    "cron:seed": "tsx scripts/cron.ts seed",
-    "cron:refresh": "tsx scripts/cron.ts refresh"
+    "frontpage": "tsx scripts/cron.ts frontpage",
+    "frontpage:refresh": "tsx scripts/cron.ts frontpage:refresh",
+    "bots": "tsx scripts/cron.ts bots",
+    "prune": "tsx scripts/cron.ts prune",
+    "seed": "tsx scripts/cron.ts seed",
+    "refresh": "tsx scripts/cron.ts refresh"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",

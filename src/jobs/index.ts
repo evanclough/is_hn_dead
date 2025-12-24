@@ -25,11 +25,11 @@ export async function refresh(): Promise<boolean> {
   const refreshSuccess: boolean = await refreshFrontPage();
   console.log(`refresh ${refreshSuccess ? "succeeded" : "failed"}`);
 
-  console.log(`showing front page to bots`);
-  const botSuccess: boolean = await addBotComments();
-  console.log(
-    `bots ${botSuccess ? "successfully" : "failed to"} read front page`,
-  );
+  //console.log(`showing front page to bots`);
+  //const botSuccess: boolean = await addBotComments();
+  //console.log(
+  //  `bots ${botSuccess ? "successfully" : "failed to"} read front page`,
+  //);
 
   console.log(
     `removing all stories and comments more than ${NUM_DAYS_KEPT} days old...`,
@@ -37,5 +37,5 @@ export async function refresh(): Promise<boolean> {
   const pruneSuccess: boolean = await pruneOldStories();
   console.log(`removal ${pruneSuccess ? "succeeded" : "failed"}`);
 
-  return refreshSuccess && botSuccess && pruneSuccess;
+  return refreshSuccess && pruneSuccess; // && botSuccess;
 }
