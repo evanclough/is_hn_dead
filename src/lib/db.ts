@@ -1,40 +1,36 @@
 import { neon } from "@neondatabase/serverless";
 import {
-    FrontPage, 
-    StoryCard,
-    NestedComment,
-    BotRecord,
-    CommentWithGuessCounts,
-    BotPerformance,
-    StoryRecord,
-    CommentRecord,
-    ContentTable,
-    SearchByPK
+  FrontPage,
+  StoryCard,
+  NestedComment,
+  BotRecord,
+  CommentWithGuessCounts,
+  BotPerformance,
+  StoryRecord,
+  CommentRecord,
+  ContentTable,
+  SearchByPK,
 } from "@/types";
 
-import {
-    getRandomCommentId
-} from "@/lib/utils"
+import { getRandomCommentId } from "@/lib/utils";
 
 import {
-    FRONTPAGE_NUM_STORIES,
-    NUM_DAYS_KEPT,
-    NUM_TOP_BOTS,
+  FRONTPAGE_NUM_STORIES,
+  NUM_DAYS_KEPT,
+  NUM_TOP_BOTS,
 } from "@/lib/constants";
 
 const sql = neon(process.env.DATABASE_URL!);
 
-
-type CountObject = {count: number};
+type CountObject = { count: number };
 type Count = CountObject[];
 
-type IDObject = {id: number};
+type IDObject = { id: number };
 type ID = IDObject[];
 
-
 export async function grabTopStories(): Promise<FrontPage | null> {
-    try {
-        const frontPage = await sql`
+  try {
+    const frontPage = (await sql`
             SELECT
             s.id,
             s.by,
@@ -56,71 +52,85 @@ export async function grabTopStories(): Promise<FrontPage | null> {
             s.title, s.url, s.text,
             s.active, s.last_activated
             ORDER BY s.active ASC                     -- rank 1,2,3…
-        ` as FrontPage;
+        `) as FrontPage;
 
-        if(frontPage.length !== FRONTPAGE_NUM_STORIES){
-            console.error(`Error fetching front page: incorrect number of stories ${frontPage.length}`);
-            return null;
-        }
-
-        return frontPage;
-    }catch (err){
-        console.error(err);
-        return null;
+    if (frontPage.length !== FRONTPAGE_NUM_STORIES) {
+      console.error(
+        `Error fetching front page: incorrect number of stories ${frontPage.length}`,
+      );
+      return null;
     }
+
+    return frontPage;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
 
-export async function grabStoryCard(storyId: string): Promise<StoryCard | null> {
-    try {
-        const [storyRecord] = await sql`SELECT * FROM stories WHERE id = ${storyId}` as StoryRecord[];
+export async function grabStoryCard(
+  storyId: string,
+): Promise<StoryCard | null> {
+  try {
+    const [storyRecord] =
+      (await sql`SELECT * FROM stories WHERE id = ${storyId}`) as StoryRecord[];
 
-        const [{ count }] = await sql`
+    const [{ count }] = (await sql`
             SELECT COUNT(*)::int AS count
             FROM comments
             WHERE story_id = ${storyId}
-        ` as Count;
+        `) as Count;
 
-        return {...storyRecord, descendants: count} as StoryCard;
-
-    }catch (err) {
-        console.error(err);
-        return null;
-    }
+    return { ...storyRecord, descendants: count } as StoryCard;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
 
-export async function grabStoryComments(storyId: string): Promise<NestedComment[] | null> {
+export async function grabStoryComments(
+  storyId: string,
+): Promise<NestedComment[] | null> {
+  try {
+    const storyComments =
+      (await sql`SELECT * FROM comments WHERE story_id = ${storyId}`) as CommentRecord[];
 
-    try {
-        const storyComments = await sql`SELECT * FROM comments WHERE story_id = ${storyId}` as CommentRecord[];
+    const nestComments: (parentId: string) => NestedComment[] = (parentId) => {
+      return storyComments
+        .filter((comment) => comment.parent.toString() === parentId)
+        .map((comment) => {
+          return {
+            ...comment,
+            comments: nestComments(comment.id.toString()),
+          } as NestedComment;
+        }) as NestedComment[];
+    };
 
-        const nestComments: (parentId: string) => NestedComment[] = parentId => {
-            return storyComments
-                .filter(comment => comment.parent.toString() === parentId)
-                .map((comment) => {
-                    return {...comment, comments: nestComments(comment.id.toString())} as NestedComment
-                }) as NestedComment[];
-        }
-
-        return nestComments(storyId);
-    }catch (err) {
-        console.error(err);
-        return null;
-    }
+    return nestComments(storyId);
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
 
-export async function grabBotRecord(botUsername: string): Promise<BotRecord | null> {
-    try {
-        const [botRecord] = await sql`SELECT * FROM bots WHERE username = ${botUsername}` as BotRecord[];
-        return botRecord;
-    }catch (err) {
-        console.error(err);
-        return null;
-    }
+export async function grabBotRecord(
+  botUsername: string,
+): Promise<BotRecord | null> {
+  try {
+    const [botRecord] =
+      (await sql`SELECT * FROM bots WHERE username = ${botUsername}`) as BotRecord[];
+    return botRecord;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
 
-export async function grabBotComments(botUsername: string): Promise<CommentWithGuessCounts[] | null>{
-    try {
-        const botComments = await sql`
+export async function grabBotComments(
+  botUsername: string,
+): Promise<CommentWithGuessCounts[] | null> {
+  try {
+    const botComments = (await sql`
             SELECT
             c.id,
             c.by,
@@ -141,19 +151,18 @@ export async function grabBotComments(botUsername: string): Promise<CommentWithG
             c.id, c.by, c.kids, c.parent, c.text,
             c.time, c.active, c.is_bot, c.story_id
             ORDER BY c.time DESC
-        ` as CommentWithGuessCounts[];
+        `) as CommentWithGuessCounts[];
 
-        return botComments;
-    }catch (err) {
-        console.error(err);
-        return null;
-    }
+    return botComments;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
 
 export async function grabTopBots(): Promise<BotPerformance[] | null> {
-
-    try {
-        const topBots = await sql`
+  try {
+    const topBots = (await sql`
             SELECT
             c.by AS username,
 
@@ -175,39 +184,41 @@ export async function grabTopBots(): Promise<BotPerformance[] | null> {
             HAVING COUNT(g.id) > 0             -- keep bots with at least one guess
             ORDER BY "incorrectRatio" DESC
             LIMIT ${NUM_TOP_BOTS}
-        ` as BotPerformance[];
+        `) as BotPerformance[];
 
-        return topBots;
-    }catch (err){
-        console.error(err);
-        return null;
-    }
-    
+    return topBots;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
 
-export async function makeGuess(commentId: number, isFake: boolean): Promise<boolean> {
-    try {
-        const now = Math.floor(Date.now() / 1000);
+export async function makeGuess(
+  commentId: number,
+  isFake: boolean,
+): Promise<boolean> {
+  try {
+    const now = Math.floor(Date.now() / 1000);
 
-        const [{id}] = await sql`
+    const [{ id }] = (await sql`
             INSERT INTO guesses (comment_id, is_fake, timestamp)
             VALUES (${commentId}, ${isFake}, ${now})
             RETURNING id
-        ` as ID;
+        `) as ID;
 
-        return id > -1;
-    }catch (err){
-        console.error(err);
-        return false;
-    }
+    return id > -1;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
 }
 
 export async function pruneOldStories(): Promise<boolean> {
+  try {
+    const cutoff: number =
+      Math.floor(Date.now() / 1000) - 60 * 60 * 24 * NUM_DAYS_KEPT;
 
-    try {
-        const cutoff: number = Math.floor(Date.now() / 1000) - (60 * 60 * 24 * NUM_DAYS_KEPT);
-
-        const removedComments = await sql`
+    const removedComments = (await sql`
             DELETE FROM comments
             WHERE is_bot = false
             AND story_id IN (
@@ -215,129 +226,138 @@ export async function pruneOldStories(): Promise<boolean> {
                 WHERE last_activated < ${cutoff}
             )
             RETURNING id
-        ` as ID;
+        `) as ID;
 
-        const removedStories = await sql`
+    const removedStories = (await sql`
             DELETE FROM stories
             WHERE last_activated < ${cutoff}
             RETURNING id
-        ` as ID;
+        `) as ID;
 
-        return removedStories.length > -1 && removedComments.length > -1;
-
-    }catch(err){
-        console.error(err);
-        return false;
-    }
+    return removedStories.length > -1 && removedComments.length > -1;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
 }
 
 export async function getActiveBots(): Promise<BotRecord[] | null> {
-    try {
-        const activeBots = await sql `SELECT * FROM bots WHERE active = true` as BotRecord[];
+  try {
+    const activeBots =
+      (await sql`SELECT * FROM bots WHERE active = true`) as BotRecord[];
 
-        return activeBots;
-    }catch(err){
-        console.error(err);
-        return null;
-    }
+    return activeBots;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
 
 export async function getActiveStories(): Promise<StoryRecord[] | null> {
-    try {
-        const activeStories = await sql `SELECT * FROM stories WHERE active > 0` as StoryRecord[];
+  try {
+    const activeStories =
+      (await sql`SELECT * FROM stories WHERE active > 0`) as StoryRecord[];
 
-        return activeStories;
-    }catch(err){
-        console.error(err);
-        return null;
-    }
+    return activeStories;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
 
+export async function insertBotComment(
+  botUsername: string,
+  parentId: string,
+  storyId: string,
+  response: string,
+): Promise<number> {
+  try {
+    const commentId = getRandomCommentId();
+    const now = Math.floor(Date.now() / 1000);
 
-export async function insertBotComment(botUsername: string, parentId: string, storyId: string, response: string): Promise<number>{
-
-    try{
-        const commentId = getRandomCommentId();
-        const now = Math.floor(Date.now() / 1000);
-
-        const [{id}] = await sql`
+    const [{ id }] = (await sql`
             INSERT INTO comments (id, by, kids, parent, story_id, text, time, active, is_bot)
                 VALUES (${commentId}, ${botUsername}, '[]'::jsonb, ${parentId},
                 ${storyId},${response}, ${now}, true, true)
                 RETURNING id
-        ` as ID;
+        `) as ID;
 
-        return id.toString() === commentId.toString() ? id : -1;
-    }catch(err){
-        console.error(err);
-        return -1;
-    }
+    return id.toString() === commentId.toString() ? id : -1;
+  } catch (err) {
+    console.error(err);
+    return -1;
+  }
 }
 
-export async function updateKids(itemId: string, newKids: number[], parentTable: ContentTable): Promise<boolean>{
-
-    try {
-            const [{id}] = parentTable === "stories" ? 
-                await sql`
+export async function updateKids(
+  itemId: string,
+  newKids: number[],
+  parentTable: ContentTable,
+): Promise<boolean> {
+  try {
+    const [{ id }] =
+      parentTable === "stories"
+        ? ((await sql`
                     UPDATE stories
                     SET kids = ${JSON.stringify(newKids)}::jsonb
                     WHERE id = ${itemId}
-                    RETURNING id` as ID
-            : 
-                await sql`
+                    RETURNING id`) as ID)
+        : ((await sql`
                     UPDATE comments
                     SET kids = ${JSON.stringify(newKids)}::jsonb
                     WHERE id = ${itemId}
-                    returning ID` as ID;
-        
-        return id.toString() === itemId;
-    }catch(err){
-        console.error(err);
-        return false;
-    }
-    
+                    returning ID`) as ID);
+
+    return id.toString() === itemId;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
 }
 
-export async function deactivateFrontPage(): Promise<boolean>{
-    try {
-        await sql`UPDATE stories SET active = -1 RETURNING id` as ID;
-        await sql`UPDATE comments SET active = FALSE RETURNING id` as ID;
+export async function deactivateFrontPage(): Promise<boolean> {
+  try {
+    (await sql`UPDATE stories SET active = -1 RETURNING id`) as ID;
+    (await sql`UPDATE comments SET active = FALSE RETURNING id`) as ID;
 
-        return true;
-    }catch(err){
-        console.error(err);
-        return false;
-    }
-    
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
 }
 
-export async function grabStoryRecord(storyId: string): Promise<SearchByPK<StoryRecord>>{
-    try {
-        const maybeStory = await sql`SELECT * FROM stories WHERE id = ${storyId}` as StoryRecord[];
+export async function grabStoryRecord(
+  storyId: string,
+): Promise<SearchByPK<StoryRecord>> {
+  try {
+    const maybeStory =
+      (await sql`SELECT * FROM stories WHERE id = ${storyId}`) as StoryRecord[];
 
-        return [true, maybeStory.length === 0 ? null : maybeStory[0]]; 
-
-    }catch(err){
-        console.error(err);
-        return [false, null];
-    }
+    return [true, maybeStory.length === 0 ? null : maybeStory[0]];
+  } catch (err) {
+    console.error(err);
+    return [false, null];
+  }
 }
 
-export async function grabCommentRecord(commentId: string): Promise<SearchByPK<CommentRecord>>{
-    try {
-        const maybeComment = await sql`SELECT * FROM comments WHERE id = ${commentId}` as CommentRecord[];
+export async function grabCommentRecord(
+  commentId: string,
+): Promise<SearchByPK<CommentRecord>> {
+  try {
+    const maybeComment =
+      (await sql`SELECT * FROM comments WHERE id = ${commentId}`) as CommentRecord[];
 
-        return [true, maybeComment.length === 0 ? null : maybeComment[0]]; 
-
-    }catch(err){
-        console.error(err);
-        return [false, null];
-    }
+    return [true, maybeComment.length === 0 ? null : maybeComment[0]];
+  } catch (err) {
+    console.error(err);
+    return [false, null];
+  }
 }
 
-export async function insertStory(story: StoryRecord): Promise<boolean>{
-    try {
-        const [{id}] = await sql`
+export async function insertStory(story: StoryRecord): Promise<boolean> {
+  try {
+    const [{ id }] = (await sql`
             INSERT INTO stories (
                 id, by, kids, score, time, title, url, text,  active, last_activated
             ) VALUES (
@@ -353,19 +373,18 @@ export async function insertStory(story: StoryRecord): Promise<boolean>{
                 ${story.last_activated}
             )
             RETURNING id
-        ` as ID;
+        `) as ID;
 
-        return id.toString() === story.id.toString();
-    }catch(err){
-        console.error(err);
-        return false;
-    }
-    
+    return id.toString() === story.id.toString();
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
 }
 
-export async function insertComment(comment: CommentRecord): Promise<boolean>{
-    try{
-        const [{id}]  = await sql`
+export async function insertComment(comment: CommentRecord): Promise<boolean> {
+  try {
+    const [{ id }] = (await sql`
             INSERT INTO comments (
                 id, by, kids, parent, story_id, text, time, active, is_bot
             ) VALUES (
@@ -380,19 +399,24 @@ export async function insertComment(comment: CommentRecord): Promise<boolean>{
                 ${comment.is_bot}
             )
             RETURNING id
-        ` as ID;
-        return id.toString() === comment.id.toString();
-    }catch(err){
-        console.error(err);
-        return false;
-    }
+        `) as ID;
+    return id.toString() === comment.id.toString();
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
 }
 
-export async function refreshStoryRecord(storyId: string, kids: number[], score: number, rank: number): Promise<boolean>{
-    try {
-        const now = Math.floor(Date.now() / 1000);
+export async function refreshStoryRecord(
+  storyId: string,
+  kids: number[],
+  score: number,
+  rank: number,
+): Promise<boolean> {
+  try {
+    const now = Math.floor(Date.now() / 1000);
 
-        const [{id}] = await sql`
+    const [{ id }] = (await sql`
             UPDATE stories SET
                 kids = ${JSON.stringify(kids)},
                 score = ${score},
@@ -400,29 +424,32 @@ export async function refreshStoryRecord(storyId: string, kids: number[], score:
                 last_activated = ${now}
             WHERE id = ${storyId}
             RETURNING id
-        ` as ID;
-        
-        return id.toString() === storyId;
-    }catch(err){
-        console.error(err);
-        return false;
-    }
+        `) as ID;
+
+    return id.toString() === storyId;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
 }
 
-export async function refreshCommentRecord(commentId: string, kids: number[]): Promise<boolean>{
-    try{
-        const [{id}] = await sql`
+export async function refreshCommentRecord(
+  commentId: string,
+  kids: number[],
+): Promise<boolean> {
+  try {
+    const [{ id }] = (await sql`
             UPDATE comments SET
                 kids = ${JSON.stringify(kids)},
                 active = TRUE
             WHERE id = ${commentId}
             RETURNING id
-        ` as ID;
+        `) as ID;
 
-        return id.toString() === commentId;
-    }catch(err){
-        console.error(err);
-        return false;
-    }
+    return id.toString() === commentId;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
 }
 

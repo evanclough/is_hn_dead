@@ -6,14 +6,22 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "local:frontpage": "tsx scripts/cron.ts frontpage",
+    "local:frontpage:refresh": "tsx scripts/cron.ts frontpage:refresh",
+    "local:bots": "tsx scripts/cron.ts bots",
+    "local:prune": "tsx scripts/cron.ts prune",
+    "local:seed": "tsx scripts/cron.ts seed",
+    "local:refresh": "tsx scripts/cron.ts refresh",
+    "cron:seed": "tsx scripts/cron.ts seed",
+    "cron:refresh": "tsx scripts/cron.ts refresh"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
     "clsx": "^2.1.1",
     "he": "^1.2.0",
     "html-react-parser": "^5.2.5",
-    "next": "15.3.2",
+    "next": "^15.5.9",
     "openai": "^5.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -29,6 +37,7 @@
     "@types/sanitize-html": "^2.16.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
+    "tsx": "^4.19.4",
     "typescript": "^5"
   }
 }

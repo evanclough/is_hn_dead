@@ -1,21 +1,26 @@
-name: cron-secret-test
+name: hn-cron
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 jobs:
-  test-secret:
+  cron:
     runs-on: ubuntu-latest
     steps:
-      - name: Confirm secret is set
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install deps
+        run: npm ci
+      - name: Run cron task
         env:
-          TOKEN: ${{ secrets.CRON_SECRET }}
-        run: |
-          if [ -z "$TOKEN" ]; then
-            echo "Secret is NOT set!"
-            exit 1
-          else
-            echo "Secret is set."
-          fi
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CRON_PERIOD_MINUTES: ${{ vars.CRON_PERIOD_MINUTES || '30' }}
+        run: npm run cron:refresh
