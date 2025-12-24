@@ -28,6 +28,14 @@ type Count = CountObject[];
 type IDObject = { id: number };
 type ID = IDObject[];
 
+type RangeObject = { min: number | null; max: number | null };
+type Range = RangeObject[];
+
+type NameObject = { name: string | null };
+type Name = NameObject[];
+
+type ActiveSample = { id: number; active: number };
+
 export async function grabTopStories(): Promise<FrontPage | null> {
   try {
     const frontPage = (await sql`
@@ -55,8 +63,58 @@ export async function grabTopStories(): Promise<FrontPage | null> {
         `) as FrontPage;
 
     if (frontPage.length !== FRONTPAGE_NUM_STORIES) {
+      const [{ count: totalStories }] = (await sql`
+        SELECT COUNT(*)::int AS count
+        FROM stories
+      `) as Count;
+      const [{ count: activeStories }] = (await sql`
+        SELECT COUNT(*)::int AS count
+        FROM stories
+        WHERE active > 0
+      `) as Count;
+      const [{ min: minActivated, max: maxActivated }] = (await sql`
+        SELECT
+          MIN(last_activated) AS min,
+          MAX(last_activated) AS max
+        FROM stories
+      `) as Range;
+
       console.error(
         `Error fetching front page: incorrect number of stories ${frontPage.length}`,
+      );
+      console.error(`Front page debug: expected=${FRONTPAGE_NUM_STORIES}`);
+      console.error(
+        `Front page debug: total=${totalStories}, active=${activeStories}, last_activated min=${minActivated ?? "null"}, max=${maxActivated ?? "null"}`,
+      );
+      const [{ name: dbName }] =
+        (await sql`SELECT current_database() AS name`) as Name;
+      const [{ name: dbUser }] =
+        (await sql`SELECT current_user AS name`) as Name;
+      const activeSample = (await sql`
+        SELECT id, active
+        FROM stories
+        WHERE active > 0
+        ORDER BY active ASC
+        LIMIT 5
+      `) as ActiveSample[];
+      const databaseUrl = process.env.DATABASE_URL;
+      if (databaseUrl) {
+        try {
+          const parsed = new URL(databaseUrl);
+          console.error(
+            `DB debug: host=${parsed.hostname}, db=${parsed.pathname.replace(/^\//, "")}, user=${parsed.username}, current_database=${dbName ?? "null"}, current_user=${dbUser ?? "null"}`,
+          );
+        } catch (err) {
+          console.error("DB debug: failed to parse DATABASE_URL", err);
+        }
+      } else {
+        console.error("DB debug: DATABASE_URL not set");
+      }
+      console.error(
+        `Front page debug: active sample=${JSON.stringify(activeSample)}`,
+      );
+      console.error(
+        `Env debug: NODE_ENV=${process.env.NODE_ENV ?? "unknown"}, VERCEL_ENV=${process.env.VERCEL_ENV ?? "unknown"}`,
       );
       return null;
     }
@@ -452,4 +510,3 @@ export async function refreshCommentRecord(
     return false;
   }
 }
-

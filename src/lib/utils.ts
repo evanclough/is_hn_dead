@@ -5,8 +5,15 @@ import sanitizeHtml from "sanitize-html";
 import { JSX } from "react";
 
 export function getTimeString(unixSeconds: number): string {
+  const parsed = Number(unixSeconds);
+  if (!Number.isFinite(parsed)) {
+    return "unknown time";
+  }
+
+  // Accept seconds or milliseconds.
+  const normalizedSeconds = parsed > 1e12 ? parsed / 1000 : parsed;
   const nowSeconds = Date.now() / 1000;
-  const diff = Math.max(nowSeconds - unixSeconds, 0);
+  const diff = Math.max(nowSeconds - normalizedSeconds, 0);
 
   if (diff < 60) {
     return `${Math.round(diff)} second${Math.round(diff) === 1 ? "" : "s"} ago`;
